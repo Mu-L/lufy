@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "lufy/pkg/proto";
+
+// 基础消息头
+message MessageHeader {
+    uint32 msg_id = 1;        // 消息ID
+    uint32 seq = 2;           // 序列号
+    uint64 user_id = 3;       // 用户ID
+    uint32 timestamp = 4;     // 时间戳
+    string session_id = 5;    // 会话ID
+}
+
+// 基础请求消息
+message BaseRequest {
+    MessageHeader header = 1;
+    bytes data = 2;
+}
+
+// 基础响应消息
+message BaseResponse {
+    MessageHeader header = 1;
+    int32 code = 2;           // 错误码
+    string msg = 3;           // 错误信息
+    bytes data = 4;           // 响应数据
+}
+
+// RPC消息
+message RPCMessage {
+    string service = 1;       // 服务名
+    string method = 2;        // 方法名
+    bytes request = 3;        // 请求数据
+    bytes response = 4;       // 响应数据
+    int32 error_code = 5;     // 错误码
+    string error_msg = 6;     // 错误信息
+}
+
+// 用户登录请求
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+    string device_id = 3;
+    string platform = 4;
+    string version = 5;
+}
+
+// 用户登录响应
+message LoginResponse {
+    uint64 user_id = 1;
+    string token = 2;
+    string nickname = 3;
+    int32 level = 4;
+    int64 exp = 5;
+    int64 gold = 6;
+    int64 diamond = 7;
+}
+
+// 聊天消息
+message ChatMessage {
+    uint64 from_user_id = 1;
+    uint64 to_user_id = 2;    // 0表示全服聊天
+    int32 channel = 3;        // 聊天频道
+    string content = 4;
+    uint32 timestamp = 5;
+}
+
+// 好友信息
+message FriendInfo {
+    uint64 user_id = 1;
+    string nickname = 2;
+    int32 level = 3;
+    bool online = 4;
+    uint32 last_login_time = 5;
+}
+
+// 好友请求
+message FriendRequest {
+    uint64 from_user_id = 1;
+    uint64 to_user_id = 2;
+    string message = 3;
+}
+
+// 邮件信息
+message MailInfo {
+    uint64 mail_id = 1;
+    uint64 to_user_id = 2;
+    string title = 3;
+    string content = 4;
+    repeated MailReward rewards = 5;
+    bool is_read = 6;
+    bool is_claimed = 7;
+    uint32 expire_time = 8;
+    uint32 create_time = 9;
+}
+
+// 邮件奖励
+message MailReward {
+    int32 type = 1;           // 奖励类型
+    int32 item_id = 2;        // 物品ID
+    int64 count = 3;          // 数量
+}
+
+// 游戏房间信息
+message GameRoom {
+    uint64 room_id = 1;
+    int32 game_type = 2;
+    repeated uint64 players = 3;
+    int32 status = 4;         // 房间状态
+    bytes game_data = 5;      // 游戏数据
+}
+
+// 游戏操作
+message GameAction {
+    uint64 user_id = 1;
+    int32 action_type = 2;
+    bytes action_data = 3;
+    uint32 timestamp = 4;
+}
+
+// GM命令
+message GMCommand {
+    string command = 1;
+    repeated string args = 2;
+    uint64 target_user_id = 3;
+}
+
+// 服务器节点信息
+message NodeInfo {
+    string node_id = 1;
+    string node_type = 2;
+    string address = 3;
+    int32 port = 4;
+    bool online = 5;
+    int32 load = 6;           // 负载
+    uint32 update_time = 7;
+}

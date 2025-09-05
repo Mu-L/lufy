@@ -1,0 +1,96 @@
+# 游戏服务器配置文件
+server:
+  # 服务器基础配置
+  name: "lufy-game-server"
+  version: "1.0.0"
+  debug: true
+  
+# 网络配置
+network:
+  tcp_port: 8001
+  rpc_port: 9001
+  http_port: 7001
+  max_connections: 10000
+  read_timeout: 30
+  write_timeout: 30
+
+# 数据库配置
+database:
+  redis:
+    addr: "127.0.0.1:6379"
+    password: ""
+    db: 0
+    pool_size: 100
+    max_retries: 3
+    
+  mongodb:
+    uri: "mongodb://127.0.0.1:27017"
+    database: "lufy_game"
+    pool_size: 100
+    
+# 消息队列配置
+nsq:
+  nsqd_address: "127.0.0.1:4150"
+  nsqlookupd_address: "127.0.0.1:4161"
+  
+# 服务发现配置
+etcd:
+  endpoints:
+    - "127.0.0.1:2379"
+  dial_timeout: 5
+  
+# 日志配置
+log:
+  level: "debug"
+  format: "json"
+  output: "stdout"
+  
+# 节点配置
+nodes:
+  center:
+    count: 1
+    ports: [8010]
+    
+  gateway:
+    count: 2
+    ports: [8001, 8002]
+    
+  login:
+    count: 1
+    ports: [8020]
+    
+  lobby:
+    count: 1
+    ports: [8030]
+    
+  friend:
+    count: 1
+    ports: [8040]
+    
+  chat:
+    count: 1
+    ports: [8050]
+    
+  mail:
+    count: 1
+    ports: [8060]
+    
+  game:
+    count: 3
+    ports: [8100, 8101, 8102]
+    
+  gm:
+    count: 1
+    ports: [8200]
+
+# 对象池配置
+object_pool:
+  message_pool_size: 10000
+  connection_pool_size: 1000
+  actor_pool_size: 5000
+
+# RPC连接池配置
+rpc:
+  pool_size: 50
+  max_idle: 10
+  idle_timeout: 300

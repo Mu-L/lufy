@@ -1,0 +1,166 @@
+groups:
+  - name: lufy_alerts
+    rules:
+      # 服务可用性告警
+      - alert: LufyServiceDown
+        expr: up{job=~"lufy-.*"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Lufy服务不可用"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上已离线超过30秒"
+
+      # 高CPU使用率告警
+      - alert: HighCPUUsage
+        expr: lufy_cpu_usage_percent > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU使用率过高"
+          description: "节点 {{ $labels.node_id }} 的CPU使用率为 {{ $value }}%，已持续超过2分钟"
+
+      # 高内存使用率告警
+      - alert: HighMemoryUsage
+        expr: lufy_memory_usage_bytes / (1024*1024*1024) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "内存使用率过高"
+          description: "节点 {{ $labels.node_id }} 的内存使用量为 {{ $value }}GB，已超过阈值"
+
+      # Goroutine数量异常告警
+      - alert: TooManyGoroutines
+        expr: lufy_goroutines_total > 10000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Goroutine数量过多"
+          description: "节点 {{ $labels.node_id }} 的Goroutine数量为 {{ $value }}，可能存在内存泄漏"
+
+      # 连接数过高告警
+      - alert: TooManyConnections
+        expr: lufy_connections_total > 8000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "连接数过高"
+          description: "节点 {{ $labels.node_id }} 的连接数为 {{ $value }}，接近上限"
+
+      # 错误率过高告警
+      - alert: HighErrorRate
+        expr: rate(lufy_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "错误率过高"
+          description: "节点 {{ $labels.node_id }} 的错误率为 {{ $value }}/秒，已超过阈值"
+
+      # 请求延迟过高告警
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(lufy_request_duration_seconds_bucket[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "请求延迟过高"
+          description: "节点 {{ $labels.node_id }} 的95分位请求延迟为 {{ $value }}秒"
+
+      # 数据库连接告警
+      - alert: DatabaseConnectionIssue
+        expr: lufy_db_connections_total < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "数据库连接问题"
+          description: "节点 {{ $labels.node_id }} 的数据库连接数为 {{ $value }}"
+
+      # NSQ消息积压告警
+      - alert: NSQMessageBacklog
+        expr: nsq_depth > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NSQ消息积压"
+          description: "NSQ主题 {{ $labels.topic }} 的消息深度为 {{ $value }}"
+
+  - name: lufy_infrastructure
+    rules:
+      # Redis服务告警
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis服务不可用"
+          description: "Redis服务已离线超过30秒"
+
+      # MongoDB服务告警
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB服务不可用"
+          description: "MongoDB服务已离线超过30秒"
+
+      # ETCD服务告警
+      - alert: ETCDDown
+        expr: etcd_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "ETCD服务不可用"
+          description: "ETCD服务已离线超过30秒"
+
+      # NSQ服务告警
+      - alert: NSQDown
+        expr: nsq_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "NSQ服务不可用"
+          description: "NSQ服务已离线超过30秒"
+
+  - name: lufy_business
+    rules:
+      # 游戏房间数量告警
+      - alert: TooManyGameRooms
+        expr: lufy_game_rooms_total > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "游戏房间数量过多"
+          description: "活跃游戏房间数量为 {{ $value }}，可能影响性能"
+
+      # 用户在线数量告警
+      - alert: HighOnlineUsers
+        expr: lufy_online_users_total > 50000
+        for: 2m
+        labels:
+          severity: info
+        annotations:
+          summary: "用户在线数量较高"
+          description: "当前在线用户数量为 {{ $value }}"
+
+      # 登录失败率告警
+      - alert: HighLoginFailureRate
+        expr: rate(lufy_login_failures_total[5m]) / rate(lufy_login_attempts_total[5m]) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "登录失败率过高"
+          description: "登录失败率为 {{ $value | humanizePercentage }}%"

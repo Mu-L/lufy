@@ -1,0 +1,357 @@
+version: '3.8'
+
+networks:
+  lufy-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  mongodb-data:
+  etcd-data:
+
+services:
+  # 基础设施服务
+  redis:
+    image: redis:7-alpine
+    container_name: lufy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - lufy-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  mongodb:
+    image: mongo:6.0
+    container_name: lufy-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: lufy_game
+    volumes:
+      - mongodb-data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - lufy-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: lufy-etcd
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      ETCD_NAME: etcd0
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER: etcd0=http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster-1
+      ETCD_INITIAL_CLUSTER_STATE: new
+    volumes:
+      - etcd-data:/etcd-data
+    networks:
+      - lufy-network
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  nsqlookupd:
+    image: nsqio/nsq:v1.2.1
+    container_name: lufy-nsqlookupd
+    command: /nsqlookupd
+    ports:
+      - "4160:4160"
+      - "4161:4161"
+    networks:
+      - lufy-network
+
+  nsqd:
+    image: nsqio/nsq:v1.2.1
+    container_name: lufy-nsqd
+    command: /nsqd --lookupd-tcp-address=nsqlookupd:4160
+    ports:
+      - "4150:4150"
+      - "4151:4151"
+    depends_on:
+      - nsqlookupd
+    networks:
+      - lufy-network
+
+  # Lufy游戏服务器服务
+  lufy-center:
+    build: .
+    container_name: lufy-center
+    command: ["-config=config/config.yaml", "-node=center", "-id=center1"]
+    ports:
+      - "8010:8010"
+      - "9010:9010"
+    depends_on:
+      - redis
+      - mongodb
+      - etcd
+      - nsqlookupd
+      - nsqd
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=center
+      - NODE_ID=center1
+    restart: unless-stopped
+
+  lufy-login:
+    build: .
+    container_name: lufy-login
+    command: ["-config=config/config.yaml", "-node=login", "-id=login1"]
+    ports:
+      - "8020:8020"
+      - "9020:9020"
+    depends_on:
+      - lufy-center
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=login
+      - NODE_ID=login1
+    restart: unless-stopped
+
+  lufy-gateway1:
+    build: .
+    container_name: lufy-gateway1
+    command: ["-config=config/config.yaml", "-node=gateway", "-id=gateway1"]
+    ports:
+      - "8001:8001"
+      - "9001:9001"
+      - "7001:7001"
+    depends_on:
+      - lufy-login
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=gateway
+      - NODE_ID=gateway1
+    restart: unless-stopped
+
+  lufy-gateway2:
+    build: .
+    container_name: lufy-gateway2
+    command: ["-config=config/config.yaml", "-node=gateway", "-id=gateway2"]
+    ports:
+      - "8002:8002"
+      - "9002:9002"
+      - "7002:7002"
+    depends_on:
+      - lufy-login
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=gateway
+      - NODE_ID=gateway2
+    restart: unless-stopped
+
+  lufy-lobby:
+    build: .
+    container_name: lufy-lobby
+    command: ["-config=config/config.yaml", "-node=lobby", "-id=lobby1"]
+    ports:
+      - "8030:8030"
+      - "9030:9030"
+    depends_on:
+      - lufy-gateway1
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=lobby
+      - NODE_ID=lobby1
+    restart: unless-stopped
+
+  lufy-friend:
+    build: .
+    container_name: lufy-friend
+    command: ["-config=config/config.yaml", "-node=friend", "-id=friend1"]
+    ports:
+      - "8040:8040"
+      - "9040:9040"
+    depends_on:
+      - lufy-gateway1
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=friend
+      - NODE_ID=friend1
+    restart: unless-stopped
+
+  lufy-chat:
+    build: .
+    container_name: lufy-chat
+    command: ["-config=config/config.yaml", "-node=chat", "-id=chat1"]
+    ports:
+      - "8050:8050"
+      - "9050:9050"
+    depends_on:
+      - lufy-gateway1
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=chat
+      - NODE_ID=chat1
+    restart: unless-stopped
+
+  lufy-mail:
+    build: .
+    container_name: lufy-mail
+    command: ["-config=config/config.yaml", "-node=mail", "-id=mail1"]
+    ports:
+      - "8060:8060"
+      - "9060:9060"
+    depends_on:
+      - lufy-gateway1
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=mail
+      - NODE_ID=mail1
+    restart: unless-stopped
+
+  lufy-game1:
+    build: .
+    container_name: lufy-game1
+    command: ["-config=config/config.yaml", "-node=game", "-id=game1"]
+    ports:
+      - "8100:8100"
+      - "9100:9100"
+    depends_on:
+      - lufy-lobby
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=game
+      - NODE_ID=game1
+    restart: unless-stopped
+
+  lufy-game2:
+    build: .
+    container_name: lufy-game2
+    command: ["-config=config/config.yaml", "-node=game", "-id=game2"]
+    ports:
+      - "8101:8101"
+      - "9101:9101"
+    depends_on:
+      - lufy-lobby
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=game
+      - NODE_ID=game2
+    restart: unless-stopped
+
+  lufy-game3:
+    build: .
+    container_name: lufy-game3
+    command: ["-config=config/config.yaml", "-node=game", "-id=game3"]
+    ports:
+      - "8102:8102"
+      - "9102:9102"
+    depends_on:
+      - lufy-lobby
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=game
+      - NODE_ID=game3
+    restart: unless-stopped
+
+  lufy-gm:
+    build: .
+    container_name: lufy-gm
+    command: ["-config=config/config.yaml", "-node=gm", "-id=gm1"]
+    ports:
+      - "8200:8200"
+      - "9200:9200"
+    depends_on:
+      - lufy-center
+    networks:
+      - lufy-network
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - NODE_TYPE=gm
+      - NODE_ID=gm1
+    restart: unless-stopped
+
+  # 监控和管理工具
+  nsqadmin:
+    image: nsqio/nsq:v1.2.1
+    container_name: lufy-nsqadmin
+    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
+    ports:
+      - "4171:4171"
+    depends_on:
+      - nsqlookupd
+      - nsqd
+    networks:
+      - lufy-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: lufy-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - lufy-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: lufy-mongo-express
+    ports:
+      - "8082:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password123
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:password123@mongodb:27017/
+    depends_on:
+      - mongodb
+    networks:
+      - lufy-network

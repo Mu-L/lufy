@@ -44,10 +44,7 @@ type ServerConfig struct {
 
 	NSQ mq.NSQConfig `yaml:"nsq"`
 
-	ETCD struct {
-		Endpoints   []string `yaml:"endpoints"`
-		DialTimeout int      `yaml:"dial_timeout"`
-	} `yaml:"etcd"`
+	ETCD discovery.ETCDConfig `yaml:"etcd"`
 
 	Log logger.LogConfig `yaml:"log"`
 
@@ -181,10 +178,7 @@ func (bs *BaseServer) initComponents() error {
 	bs.messageBroker = mq.NewMessageBroker(nsqManager, bs.nodeID)
 
 	// 初始化ETCD服务注册
-	registry, err := discovery.NewETCDRegistry(
-		bs.config.ETCD.Endpoints,
-		time.Duration(bs.config.ETCD.DialTimeout)*time.Second,
-	)
+	registry, err := discovery.NewETCDRegistry(&bs.config.ETCD)
 	if err != nil {
 		return fmt.Errorf("failed to init etcd registry: %v", err)
 	}

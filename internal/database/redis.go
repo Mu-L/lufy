@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,64 +15,219 @@ import (
 
 // RedisConfig Redis配置
 type RedisConfig struct {
-	Addr         string        `yaml:"addr"`
-	Password     string        `yaml:"password"`
-	DB           int           `yaml:"db"`
+	// 单机模式配置
+	Addr     string `yaml:"addr"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+
+	// 集群模式配置
+	ClusterMode  bool     `yaml:"cluster_mode"`
+	ClusterAddrs []string `yaml:"cluster_addrs"`
+
+	// 哨兵模式配置
+	SentinelMode   bool     `yaml:"sentinel_mode"`
+	SentinelAddrs  []string `yaml:"sentinel_addrs"`
+	SentinelMaster string   `yaml:"sentinel_master"`
+
+	// 通用配置
 	PoolSize     int           `yaml:"pool_size"`
 	MaxRetries   int           `yaml:"max_retries"`
 	DialTimeout  time.Duration `yaml:"dial_timeout"`
 	ReadTimeout  time.Duration `yaml:"read_timeout"`
 	WriteTimeout time.Duration `yaml:"write_timeout"`
 	IdleTimeout  time.Duration `yaml:"idle_timeout"`
+
+	// 集群特有配置
+	MaxRedirects   int  `yaml:"max_redirects"`
+	ReadOnly       bool `yaml:"read_only"`
+	RouteByLatency bool `yaml:"route_by_latency"`
+	RouteRandomly  bool `yaml:"route_randomly"`
 }
 
 // RedisManager Redis管理器
 type RedisManager struct {
-	client *redis.Client
-	config *RedisConfig
-	ctx    context.Context
-	mutex  sync.RWMutex
+	client         redis.Cmdable // 可以是Client、ClusterClient或SentinelClient
+	clusterClient  *redis.ClusterClient
+	sentinelClient *redis.Client
+	config         *RedisConfig
+	ctx            context.Context
+	mutex          sync.RWMutex
+	mode           string // "single", "cluster", "sentinel"
 }
 
 // NewRedisManager 创建Redis管理器
 func NewRedisManager(config *RedisConfig) (*RedisManager, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr:         config.Addr,
-		Password:     config.Password,
-		DB:           config.DB,
-		PoolSize:     config.PoolSize,
-		MaxRetries:   config.MaxRetries,
-		DialTimeout:  config.DialTimeout,
-		ReadTimeout:  config.ReadTimeout,
-		WriteTimeout: config.WriteTimeout,
-		IdleTimeout:  config.IdleTimeout,
-	})
-
 	ctx := context.Background()
 
-	// 测试连接
-	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("failed to connect to redis: %v", err)
-	}
-
 	manager := &RedisManager{
-		client: client,
 		config: config,
 		ctx:    ctx,
 	}
 
-	logger.Info(fmt.Sprintf("Redis connected to %s", config.Addr))
+	var err error
+
+	// 根据配置选择Redis模式
+	if config.ClusterMode {
+		manager.mode = "cluster"
+		err = manager.initClusterMode()
+	} else if config.SentinelMode {
+		manager.mode = "sentinel"
+		err = manager.initSentinelMode()
+	} else {
+		manager.mode = "single"
+		err = manager.initSingleMode()
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize redis: %v", err)
+	}
+
+	// 测试连接
+	if err := manager.client.Ping(ctx).Err(); err != nil {
+		return nil, fmt.Errorf("failed to connect to redis: %v", err)
+	}
+
+	logger.Infof("Redis connected in %s mode", manager.mode)
 	return manager, nil
 }
 
+// initSingleMode 初始化单机模式
+func (rm *RedisManager) initSingleMode() error {
+	client := redis.NewClient(&redis.Options{
+		Addr:         rm.config.Addr,
+		Password:     rm.config.Password,
+		DB:           rm.config.DB,
+		PoolSize:     rm.config.PoolSize,
+		MaxRetries:   rm.config.MaxRetries,
+		DialTimeout:  rm.config.DialTimeout,
+		ReadTimeout:  rm.config.ReadTimeout,
+		WriteTimeout: rm.config.WriteTimeout,
+		IdleTimeout:  rm.config.IdleTimeout,
+	})
+
+	rm.client = client
+	logger.Infof("Redis single mode initialized: %s", rm.config.Addr)
+	return nil
+}
+
+// initClusterMode 初始化集群模式
+func (rm *RedisManager) initClusterMode() error {
+	if len(rm.config.ClusterAddrs) == 0 {
+		return fmt.Errorf("cluster addresses not configured")
+	}
+
+	clusterClient := redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs:        rm.config.ClusterAddrs,
+		Password:     rm.config.Password,
+		PoolSize:     rm.config.PoolSize,
+		MaxRetries:   rm.config.MaxRetries,
+		DialTimeout:  rm.config.DialTimeout,
+		ReadTimeout:  rm.config.ReadTimeout,
+		WriteTimeout: rm.config.WriteTimeout,
+		IdleTimeout:  rm.config.IdleTimeout,
+
+		// 集群特有配置
+		MaxRedirects:   rm.config.MaxRedirects,
+		ReadOnly:       rm.config.ReadOnly,
+		RouteByLatency: rm.config.RouteByLatency,
+		RouteRandomly:  rm.config.RouteRandomly,
+	})
+
+	rm.client = clusterClient
+	rm.clusterClient = clusterClient
+	logger.Infof("Redis cluster mode initialized: %s", strings.Join(rm.config.ClusterAddrs, ","))
+	return nil
+}
+
+// initSentinelMode 初始化哨兵模式
+func (rm *RedisManager) initSentinelMode() error {
+	if len(rm.config.SentinelAddrs) == 0 {
+		return fmt.Errorf("sentinel addresses not configured")
+	}
+
+	if rm.config.SentinelMaster == "" {
+		return fmt.Errorf("sentinel master name not configured")
+	}
+
+	sentinelClient := redis.NewFailoverClient(&redis.FailoverOptions{
+		MasterName:    rm.config.SentinelMaster,
+		SentinelAddrs: rm.config.SentinelAddrs,
+		Password:      rm.config.Password,
+		DB:            rm.config.DB,
+		PoolSize:      rm.config.PoolSize,
+		MaxRetries:    rm.config.MaxRetries,
+		DialTimeout:   rm.config.DialTimeout,
+		ReadTimeout:   rm.config.ReadTimeout,
+		WriteTimeout:  rm.config.WriteTimeout,
+		IdleTimeout:   rm.config.IdleTimeout,
+	})
+
+	rm.client = sentinelClient
+	rm.sentinelClient = sentinelClient
+	logger.Infof("Redis sentinel mode initialized: master=%s, sentinels=%s",
+		rm.config.SentinelMaster, strings.Join(rm.config.SentinelAddrs, ","))
+	return nil
+}
+
 // GetClient 获取Redis客户端
-func (rm *RedisManager) GetClient() *redis.Client {
+func (rm *RedisManager) GetClient() redis.Cmdable {
 	return rm.client
+}
+
+// GetClusterClient 获取集群客户端（仅集群模式）
+func (rm *RedisManager) GetClusterClient() *redis.ClusterClient {
+	return rm.clusterClient
+}
+
+// GetMode 获取Redis模式
+func (rm *RedisManager) GetMode() string {
+	return rm.mode
 }
 
 // Close 关闭Redis连接
 func (rm *RedisManager) Close() error {
-	return rm.client.Close()
+	switch rm.mode {
+	case "cluster":
+		if rm.clusterClient != nil {
+			return rm.clusterClient.Close()
+		}
+	case "sentinel":
+		if rm.sentinelClient != nil {
+			return rm.sentinelClient.Close()
+		}
+	default:
+		if client, ok := rm.client.(*redis.Client); ok {
+			return client.Close()
+		}
+	}
+	return nil
+}
+
+// GetClusterInfo 获取集群信息（仅集群模式）
+func (rm *RedisManager) GetClusterInfo() (map[string]interface{}, error) {
+	if rm.mode != "cluster" || rm.clusterClient == nil {
+		return nil, fmt.Errorf("not in cluster mode")
+	}
+
+	info := make(map[string]interface{})
+
+	// 获取集群节点信息
+	clusterSlots := rm.clusterClient.ClusterSlots(rm.ctx)
+	if clusterSlots.Err() != nil {
+		return nil, clusterSlots.Err()
+	}
+
+	slots := clusterSlots.Val()
+	info["cluster_slots"] = len(slots)
+	info["cluster_nodes"] = rm.config.ClusterAddrs
+
+	// 获取集群状态
+	clusterInfo := rm.clusterClient.ClusterInfo(rm.ctx)
+	if clusterInfo.Err() == nil {
+		info["cluster_state"] = clusterInfo.Val()
+	}
+
+	return info, nil
 }
 
 // Set 设置键值对

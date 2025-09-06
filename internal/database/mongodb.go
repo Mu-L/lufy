@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,12 +17,38 @@ import (
 
 // MongoConfig MongoDB配置
 type MongoConfig struct {
-	URI             string        `yaml:"uri"`
-	Database        string        `yaml:"database"`
+	// 单机模式
+	URI      string `yaml:"uri"`
+	Database string `yaml:"database"`
+
+	// 副本集模式
+	ReplicaSet     bool     `yaml:"replica_set"`
+	ReplicaSetName string   `yaml:"replica_set_name"`
+	Hosts          []string `yaml:"hosts"`
+	AuthSource     string   `yaml:"auth_source"`
+	Username       string   `yaml:"username"`
+	Password       string   `yaml:"password"`
+
+	// 分片模式
+	ShardedCluster bool     `yaml:"sharded_cluster"`
+	MongosHosts    []string `yaml:"mongos_hosts"`
+
+	// 连接配置
 	ConnectTimeout  time.Duration `yaml:"connect_timeout"`
 	MaxPoolSize     uint64        `yaml:"max_pool_size"`
 	MinPoolSize     uint64        `yaml:"min_pool_size"`
 	MaxConnIdleTime time.Duration `yaml:"max_conn_idle_time"`
+
+	// 读写配置
+	ReadPreference string `yaml:"read_preference"` // primary, primaryPreferred, secondary, etc.
+	WriteConcern   string `yaml:"write_concern"`   // majority, 1, 2, etc.
+	ReadConcern    string `yaml:"read_concern"`    // local, available, majority, etc.
+
+	// SSL/TLS配置
+	TLSEnabled  bool   `yaml:"tls_enabled"`
+	TLSCertFile string `yaml:"tls_cert_file"`
+	TLSKeyFile  string `yaml:"tls_key_file"`
+	TLSCAFile   string `yaml:"tls_ca_file"`
 }
 
 // MongoManager MongoDB管理器
@@ -29,19 +57,38 @@ type MongoManager struct {
 	database *mongo.Database
 	config   *MongoConfig
 	ctx      context.Context
+	mode     string // "single", "replica_set", "sharded"
 }
 
 // NewMongoManager 创建MongoDB管理器
 func NewMongoManager(config *MongoConfig) (*MongoManager, error) {
 	ctx := context.Background()
 
-	clientOptions := options.Client().
-		ApplyURI(config.URI).
-		SetConnectTimeout(config.ConnectTimeout).
-		SetMaxPoolSize(config.MaxPoolSize).
-		SetMinPoolSize(config.MinPoolSize).
-		SetMaxConnIdleTime(config.MaxConnIdleTime)
+	manager := &MongoManager{
+		config: config,
+		ctx:    ctx,
+	}
 
+	var clientOptions *options.ClientOptions
+	var err error
+
+	// 根据配置选择MongoDB模式
+	if config.ShardedCluster {
+		manager.mode = "sharded"
+		clientOptions, err = manager.buildShardedClusterOptions()
+	} else if config.ReplicaSet {
+		manager.mode = "replica_set"
+		clientOptions, err = manager.buildReplicaSetOptions()
+	} else {
+		manager.mode = "single"
+		clientOptions, err = manager.buildSingleOptions()
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to build client options: %v", err)
+	}
+
+	// 连接MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to mongodb: %v", err)
@@ -49,20 +96,162 @@ func NewMongoManager(config *MongoConfig) (*MongoManager, error) {
 
 	// 测试连接
 	if err := client.Ping(ctx, nil); err != nil {
+		client.Disconnect(ctx)
 		return nil, fmt.Errorf("failed to ping mongodb: %v", err)
 	}
 
-	database := client.Database(config.Database)
+	manager.client = client
+	manager.database = client.Database(config.Database)
 
-	manager := &MongoManager{
-		client:   client,
-		database: database,
-		config:   config,
-		ctx:      ctx,
+	logger.Infof("MongoDB connected in %s mode", manager.mode)
+	return manager, nil
+}
+
+// buildSingleOptions 构建单机模式选项
+func (mm *MongoManager) buildSingleOptions() (*options.ClientOptions, error) {
+	opts := options.Client().
+		ApplyURI(mm.config.URI).
+		SetConnectTimeout(mm.config.ConnectTimeout).
+		SetMaxPoolSize(mm.config.MaxPoolSize).
+		SetMinPoolSize(mm.config.MinPoolSize).
+		SetMaxConnIdleTime(mm.config.MaxConnIdleTime)
+
+	// 添加认证信息
+	if mm.config.Username != "" && mm.config.Password != "" {
+		credential := options.Credential{
+			Username:   mm.config.Username,
+			Password:   mm.config.Password,
+			AuthSource: mm.config.AuthSource,
+		}
+		opts.SetAuth(credential)
 	}
 
-	logger.Info(fmt.Sprintf("MongoDB connected to %s", config.URI))
-	return manager, nil
+	return opts, nil
+}
+
+// buildReplicaSetOptions 构建副本集模式选项
+func (mm *MongoManager) buildReplicaSetOptions() (*options.ClientOptions, error) {
+	if len(mm.config.Hosts) == 0 {
+		return nil, fmt.Errorf("replica set hosts not configured")
+	}
+
+	if mm.config.ReplicaSetName == "" {
+		return nil, fmt.Errorf("replica set name not configured")
+	}
+
+	// 构建连接URI
+	uri := "mongodb://"
+	if mm.config.Username != "" && mm.config.Password != "" {
+		uri += fmt.Sprintf("%s:%s@", mm.config.Username, mm.config.Password)
+	}
+	uri += strings.Join(mm.config.Hosts, ",")
+	uri += fmt.Sprintf("/%s?replicaSet=%s", mm.config.Database, mm.config.ReplicaSetName)
+
+	if mm.config.AuthSource != "" {
+		uri += fmt.Sprintf("&authSource=%s", mm.config.AuthSource)
+	}
+
+	opts := options.Client().
+		ApplyURI(uri).
+		SetConnectTimeout(mm.config.ConnectTimeout).
+		SetMaxPoolSize(mm.config.MaxPoolSize).
+		SetMinPoolSize(mm.config.MinPoolSize).
+		SetMaxConnIdleTime(mm.config.MaxConnIdleTime).
+		SetReplicaSet(mm.config.ReplicaSetName)
+
+	// 设置读偏好
+	if mm.config.ReadPreference != "" {
+		readPref, err := parseReadPreference(mm.config.ReadPreference)
+		if err != nil {
+			return nil, fmt.Errorf("invalid read preference: %v", err)
+		}
+		opts.SetReadPreference(readPref)
+	}
+
+	// 设置写关注
+	if mm.config.WriteConcern != "" {
+		writeConcern, err := parseWriteConcern(mm.config.WriteConcern)
+		if err != nil {
+			return nil, fmt.Errorf("invalid write concern: %v", err)
+		}
+		opts.SetWriteConcern(writeConcern)
+	}
+
+	return opts, nil
+}
+
+// buildShardedClusterOptions 构建分片集群模式选项
+func (mm *MongoManager) buildShardedClusterOptions() (*options.ClientOptions, error) {
+	if len(mm.config.MongosHosts) == 0 {
+		return nil, fmt.Errorf("mongos hosts not configured")
+	}
+
+	// 构建连接URI
+	uri := "mongodb://"
+	if mm.config.Username != "" && mm.config.Password != "" {
+		uri += fmt.Sprintf("%s:%s@", mm.config.Username, mm.config.Password)
+	}
+	uri += strings.Join(mm.config.MongosHosts, ",")
+	uri += fmt.Sprintf("/%s", mm.config.Database)
+
+	if mm.config.AuthSource != "" {
+		uri += fmt.Sprintf("?authSource=%s", mm.config.AuthSource)
+	}
+
+	opts := options.Client().
+		ApplyURI(uri).
+		SetConnectTimeout(mm.config.ConnectTimeout).
+		SetMaxPoolSize(mm.config.MaxPoolSize).
+		SetMinPoolSize(mm.config.MinPoolSize).
+		SetMaxConnIdleTime(mm.config.MaxConnIdleTime)
+
+	return opts, nil
+}
+
+// parseReadPreference 解析读偏好
+func parseReadPreference(pref string) (*options.ReadPreference, error) {
+	switch pref {
+	case "primary":
+		return options.Primary(), nil
+	case "primaryPreferred":
+		return options.PrimaryPreferred(), nil
+	case "secondary":
+		return options.Secondary(), nil
+	case "secondaryPreferred":
+		return options.SecondaryPreferred(), nil
+	case "nearest":
+		return options.Nearest(), nil
+	default:
+		return nil, fmt.Errorf("unknown read preference: %s", pref)
+	}
+}
+
+// parseWriteConcern 解析写关注
+func parseWriteConcern(concern string) (*options.WriteConcern, error) {
+	switch concern {
+	case "majority":
+		return options.WriteConcern().SetW("majority"), nil
+	case "1":
+		return options.WriteConcern().SetW(1), nil
+	case "2":
+		return options.WriteConcern().SetW(2), nil
+	case "3":
+		return options.WriteConcern().SetW(3), nil
+	default:
+		// 尝试解析为数字
+		if w := parseIntOrDefault(concern, -1); w > 0 {
+			return options.WriteConcern().SetW(w), nil
+		}
+		return nil, fmt.Errorf("unknown write concern: %s", concern)
+	}
+}
+
+// parseIntOrDefault 解析整数或返回默认值
+func parseIntOrDefault(s string, defaultValue int) int {
+	if val, err := strconv.Atoi(s); err == nil {
+		return val
+	}
+	return defaultValue
 }
 
 // GetDatabase 获取数据库

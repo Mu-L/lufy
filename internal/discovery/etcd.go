@@ -2,8 +2,11 @@ package discovery
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"sync"
 	"time"
 
@@ -48,12 +51,52 @@ type ETCDRegistry struct {
 	keyPrefix string
 }
 
+// ETCDConfig ETCD集群配置
+type ETCDConfig struct {
+	Endpoints            []string      `yaml:"endpoints"`
+	DialTimeout         time.Duration `yaml:"dial_timeout"`
+	Username            string        `yaml:"username"`
+	Password            string        `yaml:"password"`
+	TLSEnabled          bool          `yaml:"tls_enabled"`
+	TLSCertFile         string        `yaml:"tls_cert_file"`
+	TLSKeyFile          string        `yaml:"tls_key_file"`
+	TLSCAFile           string        `yaml:"tls_ca_file"`
+	TLSInsecure         bool          `yaml:"tls_insecure"`
+	AutoSyncInterval    time.Duration `yaml:"auto_sync_interval"`
+	DialKeepAliveTime   time.Duration `yaml:"dial_keep_alive_time"`
+	DialKeepAliveTimeout time.Duration `yaml:"dial_keep_alive_timeout"`
+	MaxCallSendMsgSize  int           `yaml:"max_call_send_msg_size"`
+	MaxCallRecvMsgSize  int           `yaml:"max_call_recv_msg_size"`
+}
+
 // NewETCDRegistry 创建ETCD服务注册器
-func NewETCDRegistry(endpoints []string, dialTimeout time.Duration) (*ETCDRegistry, error) {
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
-		DialTimeout: dialTimeout,
-	})
+func NewETCDRegistry(config *ETCDConfig) (*ETCDRegistry, error) {
+	clientConfig := clientv3.Config{
+		Endpoints:            config.Endpoints,
+		DialTimeout:          config.DialTimeout,
+		AutoSyncInterval:     config.AutoSyncInterval,
+		DialKeepAliveTime:    config.DialKeepAliveTime,
+		DialKeepAliveTimeout: config.DialKeepAliveTimeout,
+		MaxCallSendMsgSize:   config.MaxCallSendMsgSize,
+		MaxCallRecvMsgSize:   config.MaxCallRecvMsgSize,
+	}
+	
+	// 设置认证
+	if config.Username != "" && config.Password != "" {
+		clientConfig.Username = config.Username
+		clientConfig.Password = config.Password
+	}
+	
+	// 设置TLS
+	if config.TLSEnabled {
+		tlsConfig, err := buildETCDTLSConfig(config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build TLS config: %v", err)
+		}
+		clientConfig.TLS = tlsConfig
+	}
+	
+	client, err := clientv3.New(clientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create etcd client: %v", err)
 	}
@@ -79,8 +122,85 @@ func NewETCDRegistry(endpoints []string, dialTimeout time.Duration) (*ETCDRegist
 	// 启动租约续期
 	go registry.keepAliveLoop()
 
-	logger.Info("ETCD service registry initialized")
+	// 启动集群健康检查
+	go registry.clusterHealthCheck()
+
+	logger.Infof("ETCD service registry initialized with endpoints: %v", config.Endpoints)
 	return registry, nil
+}
+
+// buildETCDTLSConfig 构建ETCD TLS配置
+func buildETCDTLSConfig(config *ETCDConfig) (*tls.Config, error) {
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: config.TLSInsecure,
+	}
+	
+	if config.TLSCertFile != "" && config.TLSKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(config.TLSCertFile, config.TLSKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load client cert: %v", err)
+		}
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+	
+	if config.TLSCAFile != "" {
+		caCert, err := ioutil.ReadFile(config.TLSCAFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read CA cert: %v", err)
+		}
+		
+		caCertPool := x509.NewCertPool()
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			return nil, fmt.Errorf("failed to parse CA cert")
+		}
+		tlsConfig.RootCAs = caCertPool
+	}
+	
+	return tlsConfig, nil
+}
+
+// clusterHealthCheck 集群健康检查
+func (r *ETCDRegistry) clusterHealthCheck() {
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			r.checkETCDClusterHealth()
+		case <-r.ctx.Done():
+			return
+		}
+	}
+}
+
+// checkETCDClusterHealth 检查ETCD集群健康状态
+func (r *ETCDRegistry) checkETCDClusterHealth() {
+	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
+	defer cancel()
+	
+	// 检查集群成员状态
+	memberList, err := r.client.MemberList(ctx)
+	if err != nil {
+		logger.Errorf("Failed to get ETCD member list: %v", err)
+		return
+	}
+	
+	healthyMembers := 0
+	for _, member := range memberList.Members {
+		// 检查成员健康状态
+		if len(member.ClientURLs) > 0 {
+			healthyMembers++
+		}
+	}
+	
+	logger.Debugf("ETCD cluster health: %d/%d members healthy", 
+		healthyMembers, len(memberList.Members))
+		
+	if healthyMembers < len(memberList.Members)/2 + 1 {
+		logger.Warnf("ETCD cluster may lose quorum: %d/%d members healthy", 
+			healthyMembers, len(memberList.Members))
+	}
 }
 
 // createLease 创建租约

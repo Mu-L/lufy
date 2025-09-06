@@ -11,7 +11,8 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/sirupsen/logrus v1.9.3
+	go.uber.org/zap v1.26.0
+	go.uber.org/zap/zapcore v1.26.0
 	github.com/spf13/viper v1.16.0
 	github.com/golang/sync v0.0.0-20210220032951-036812b2e83c
 	github.com/fsnotify/fsnotify v1.7.0

@@ -14,13 +14,27 @@ import (
 
 // NSQConfig NSQ配置
 type NSQConfig struct {
-	NSQDAddress       string        `yaml:"nsqd_address"`
-	NSQLookupDAddress string        `yaml:"nsqlookupd_address"`
-	MaxInFlight       int           `yaml:"max_in_flight"`
-	DialTimeout       time.Duration `yaml:"dial_timeout"`
-	ReadTimeout       time.Duration `yaml:"read_timeout"`
-	WriteTimeout      time.Duration `yaml:"write_timeout"`
-	MessageTimeout    time.Duration `yaml:"message_timeout"`
+	// 单节点模式
+	NSQDAddress       string `yaml:"nsqd_address"`
+	NSQLookupDAddress string `yaml:"nsqlookupd_address"`
+
+	// 集群模式
+	ClusterMode         bool     `yaml:"cluster_mode"`
+	NSQDAddresses       []string `yaml:"nsqd_addresses"`
+	NSQLookupDAddresses []string `yaml:"nsqlookupd_addresses"`
+
+	// 连接配置
+	MaxInFlight    int           `yaml:"max_in_flight"`
+	DialTimeout    time.Duration `yaml:"dial_timeout"`
+	ReadTimeout    time.Duration `yaml:"read_timeout"`
+	WriteTimeout   time.Duration `yaml:"write_timeout"`
+	MessageTimeout time.Duration `yaml:"message_timeout"`
+
+	// 集群配置
+	LoadBalancing       bool          `yaml:"load_balancing"`        // 负载均衡
+	FailoverEnabled     bool          `yaml:"failover_enabled"`      // 故障转移
+	HealthCheckInterval time.Duration `yaml:"health_check_interval"` // 健康检查间隔
+	ProducerPoolSize    int           `yaml:"producer_pool_size"`    // 生产者池大小
 }
 
 // MessageHandler 消息处理器接口
@@ -30,54 +44,199 @@ type MessageHandler interface {
 
 // NSQManager NSQ管理器
 type NSQManager struct {
-	config    *NSQConfig
-	producer  *nsq.Producer
-	consumers map[string]*nsq.Consumer
-	handlers  map[string]MessageHandler
-	mutex     sync.RWMutex
-	ctx       context.Context
-	cancel    context.CancelFunc
+	config          *NSQConfig
+	producers       []*nsq.Producer // 支持多个生产者（集群模式）
+	producer        *nsq.Producer   // 主生产者（兼容性）
+	consumers       map[string]*nsq.Consumer
+	handlers        map[string]MessageHandler
+	mutex           sync.RWMutex
+	ctx             context.Context
+	cancel          context.CancelFunc
+	mode            string // "single", "cluster"
+	currentProducer int    // 当前使用的生产者索引（轮询）
 }
 
 // NewNSQManager 创建NSQ管理器
 func NewNSQManager(config *NSQConfig) (*NSQManager, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// 创建生产者
-	producerConfig := nsq.NewConfig()
-	producerConfig.DialTimeout = config.DialTimeout
-	producerConfig.ReadTimeout = config.ReadTimeout
-	producerConfig.WriteTimeout = config.WriteTimeout
+	manager := &NSQManager{
+		config:    config,
+		consumers: make(map[string]*nsq.Consumer),
+		handlers:  make(map[string]MessageHandler),
+		ctx:       ctx,
+		cancel:    cancel,
+		producers: make([]*nsq.Producer, 0),
+	}
 
-	producer, err := nsq.NewProducer(config.NSQDAddress, producerConfig)
+	var err error
+	if config.ClusterMode {
+		manager.mode = "cluster"
+		err = manager.initClusterMode()
+	} else {
+		manager.mode = "single"
+		err = manager.initSingleMode()
+	}
+
 	if err != nil {
 		cancel()
-		return nil, fmt.Errorf("failed to create NSQ producer: %v", err)
+		return nil, fmt.Errorf("failed to initialize NSQ: %v", err)
+	}
+
+	logger.Infof("NSQ manager initialized in %s mode", manager.mode)
+	return manager, nil
+}
+
+// initSingleMode 初始化单节点模式
+func (nm *NSQManager) initSingleMode() error {
+	producerConfig := nsq.NewConfig()
+	producerConfig.DialTimeout = nm.config.DialTimeout
+	producerConfig.ReadTimeout = nm.config.ReadTimeout
+	producerConfig.WriteTimeout = nm.config.WriteTimeout
+
+	producer, err := nsq.NewProducer(nm.config.NSQDAddress, producerConfig)
+	if err != nil {
+		return fmt.Errorf("failed to create NSQ producer: %v", err)
 	}
 
 	// 测试连接
 	if err := producer.Ping(); err != nil {
 		producer.Stop()
-		cancel()
-		return nil, fmt.Errorf("failed to ping NSQ: %v", err)
+		return fmt.Errorf("failed to ping NSQ: %v", err)
 	}
 
-	manager := &NSQManager{
-		config:    config,
-		producer:  producer,
-		consumers: make(map[string]*nsq.Consumer),
-		handlers:  make(map[string]MessageHandler),
-		ctx:       ctx,
-		cancel:    cancel,
+	nm.producer = producer
+	nm.producers = append(nm.producers, producer)
+
+	logger.Infof("NSQ single mode initialized: %s", nm.config.NSQDAddress)
+	return nil
+}
+
+// initClusterMode 初始化集群模式
+func (nm *NSQManager) initClusterMode() error {
+	if len(nm.config.NSQDAddresses) == 0 {
+		return fmt.Errorf("NSQD addresses not configured for cluster mode")
 	}
 
-	logger.Info(fmt.Sprintf("NSQ manager initialized with NSQD: %s", config.NSQDAddress))
-	return manager, nil
+	producerConfig := nsq.NewConfig()
+	producerConfig.DialTimeout = nm.config.DialTimeout
+	producerConfig.ReadTimeout = nm.config.ReadTimeout
+	producerConfig.WriteTimeout = nm.config.WriteTimeout
+
+	// 为每个NSQD节点创建生产者
+	for _, addr := range nm.config.NSQDAddresses {
+		producer, err := nsq.NewProducer(addr, producerConfig)
+		if err != nil {
+			// 清理已创建的生产者
+			nm.closeProducers()
+			return fmt.Errorf("failed to create NSQ producer for %s: %v", addr, err)
+		}
+
+		// 测试连接
+		if err := producer.Ping(); err != nil {
+			producer.Stop()
+			// 如果不是故障转移模式，则失败
+			if !nm.config.FailoverEnabled {
+				nm.closeProducers()
+				return fmt.Errorf("failed to ping NSQ %s: %v", addr, err)
+			}
+			logger.Warnf("NSQD %s unavailable, will retry later", addr)
+			continue
+		}
+
+		nm.producers = append(nm.producers, producer)
+		logger.Infof("Connected to NSQD: %s", addr)
+	}
+
+	if len(nm.producers) == 0 {
+		return fmt.Errorf("no NSQD nodes available")
+	}
+
+	// 设置主生产者为第一个可用的
+	nm.producer = nm.producers[0]
+
+	logger.Infof("NSQ cluster mode initialized: %d producers", len(nm.producers))
+	return nil
+}
+
+// closeProducers 关闭所有生产者
+func (nm *NSQManager) closeProducers() {
+	for _, producer := range nm.producers {
+		producer.Stop()
+	}
+	nm.producers = nm.producers[:0]
 }
 
 // Publish 发布消息
 func (nm *NSQManager) Publish(topic string, data []byte) error {
+	if nm.mode == "cluster" && nm.config.LoadBalancing && len(nm.producers) > 1 {
+		return nm.publishWithLoadBalancing(topic, data)
+	}
 	return nm.producer.Publish(topic, data)
+}
+
+// publishWithLoadBalancing 负载均衡发布消息
+func (nm *NSQManager) publishWithLoadBalancing(topic string, data []byte) error {
+	nm.mutex.Lock()
+	// 轮询选择生产者
+	producer := nm.producers[nm.currentProducer%len(nm.producers)]
+	nm.currentProducer++
+	nm.mutex.Unlock()
+
+	err := producer.Publish(topic, data)
+
+	// 如果当前生产者失败且启用了故障转移，尝试其他生产者
+	if err != nil && nm.config.FailoverEnabled && len(nm.producers) > 1 {
+		for i, fallbackProducer := range nm.producers {
+			if fallbackProducer == producer {
+				continue // 跳过失败的生产者
+			}
+
+			if fallbackErr := fallbackProducer.Publish(topic, data); fallbackErr == nil {
+				logger.Warnf("Failover successful: switched from producer %d to %d", nm.currentProducer-1, i)
+				return nil
+			}
+		}
+		return fmt.Errorf("all NSQ producers failed: %v", err)
+	}
+
+	return err
+}
+
+// GetClusterStats 获取集群统计信息
+func (nm *NSQManager) GetClusterStats() map[string]interface{} {
+	stats := map[string]interface{}{
+		"mode":      nm.mode,
+		"producers": len(nm.producers),
+		"consumers": len(nm.consumers),
+	}
+
+	if nm.mode == "cluster" {
+		stats["nsqd_addresses"] = nm.config.NSQDAddresses
+		stats["load_balancing"] = nm.config.LoadBalancing
+		stats["failover_enabled"] = nm.config.FailoverEnabled
+
+		// 生产者健康状态
+		producerStatus := make([]map[string]interface{}, len(nm.producers))
+		for i, producer := range nm.producers {
+			status := map[string]interface{}{
+				"index": i,
+			}
+
+			// 尝试ping检查健康状态
+			if err := producer.Ping(); err == nil {
+				status["healthy"] = true
+			} else {
+				status["healthy"] = false
+				status["error"] = err.Error()
+			}
+
+			producerStatus[i] = status
+		}
+		stats["producer_status"] = producerStatus
+	}
+
+	return stats
 }
 
 // PublishJSON 发布JSON消息
@@ -120,15 +279,30 @@ func (nm *NSQManager) Subscribe(topic, channel string, handler MessageHandler) e
 		channel: channel,
 	})
 
-	// 连接到NSQ Lookup
-	if err := consumer.ConnectToNSQLookupd(nm.config.NSQLookupDAddress); err != nil {
-		return fmt.Errorf("failed to connect to NSQLookupd: %v", err)
+	// 连接到NSQLookupd
+	if nm.mode == "cluster" && len(nm.config.NSQLookupDAddresses) > 0 {
+		// 集群模式：连接到所有NSQLookupd
+		for _, addr := range nm.config.NSQLookupDAddresses {
+			if err := consumer.ConnectToNSQLookupd(addr); err != nil {
+				if !nm.config.FailoverEnabled {
+					return fmt.Errorf("failed to connect to NSQLookupd %s: %v", addr, err)
+				}
+				logger.Warnf("Failed to connect to NSQLookupd %s: %v", addr, err)
+			} else {
+				logger.Infof("Connected to NSQLookupd: %s", addr)
+			}
+		}
+	} else {
+		// 单机模式：连接到单个NSQLookupd
+		if err := consumer.ConnectToNSQLookupd(nm.config.NSQLookupDAddress); err != nil {
+			return fmt.Errorf("failed to connect to NSQLookupd: %v", err)
+		}
 	}
 
 	nm.consumers[key] = consumer
 	nm.handlers[key] = handler
 
-	logger.Info(fmt.Sprintf("Subscribed to topic: %s, channel: %s", topic, channel))
+	logger.Infof("Subscribed to topic: %s, channel: %s", topic, channel)
 	return nil
 }
 

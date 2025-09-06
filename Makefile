@@ -112,18 +112,61 @@ docker-run: ## 运行 Docker 容器
 	@echo "运行 Docker 容器..."
 	@docker run -d --name lufy-server -p 8001:8001 -p 9001:9001 $(DOCKER_IMAGE):$(VERSION)
 
-docker-compose-up: ## 启动完整 Docker Compose 集群
-	@echo "启动 Docker Compose 集群..."
+docker-compose-up: ## 启动单机 Docker Compose 集群
+	@echo "启动单机 Docker Compose 集群..."
 	@docker-compose up -d
-	@echo "集群启动完成"
+	@echo "单机集群启动完成"
 
-docker-compose-down: ## 停止 Docker Compose 集群
-	@echo "停止 Docker Compose 集群..."
+docker-compose-down: ## 停止单机 Docker Compose 集群
+	@echo "停止单机 Docker Compose 集群..."
 	@docker-compose down
-	@echo "集群已停止"
+	@echo "单机集群已停止"
 
-docker-compose-logs: ## 查看 Docker Compose 日志
+docker-compose-logs: ## 查看单机集群日志
 	@docker-compose logs -f
+
+# 集群相关
+cluster-build: ## 构建集群镜像
+	@echo "构建集群镜像..."
+	@docker build -t lufy-cluster:latest .
+	@docker build -f Dockerfile.cluster-init -t lufy-cluster-init:latest .
+	@echo "集群镜像构建完成"
+
+cluster-up: ## 启动完整集群
+	@echo "启动Lufy集群..."
+	@chmod +x scripts/*.sh
+	@./scripts/start_cluster.sh full --with-monitoring
+
+cluster-down: ## 停止集群
+	@echo "停止Lufy集群..."
+	@./scripts/stop_cluster.sh graceful
+
+cluster-status: ## 查看集群状态
+	@./scripts/cluster_status.sh
+
+cluster-watch: ## 实时监控集群
+	@./scripts/cluster_status.sh watch
+
+cluster-quick: ## 快速启动集群（开发用）
+	@echo "快速启动集群..."
+	@./scripts/start_cluster.sh quick
+
+cluster-clean: ## 清理集群数据
+	@echo "清理集群数据..."
+	@./scripts/stop_cluster.sh clean --force
+
+cluster-restart: cluster-down cluster-up ## 重启集群
+
+cluster-logs: ## 查看集群日志
+	@docker-compose -f docker-compose.cluster.yml logs -f
+
+cluster-backup: ## 备份集群数据
+	@echo "备份集群数据..."
+	@./scripts/cluster_backup.sh
+
+cluster-restore: ## 恢复集群数据
+	@echo "恢复集群数据..."
+	@./scripts/cluster_restore.sh
 
 # 清理相关
 clean: ## 清理构建文件

@@ -12,8 +12,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"lufy/internal/logger"
-	"lufy/pkg/proto"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // RPCService RPC服务接口

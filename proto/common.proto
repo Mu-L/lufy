@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "lufy/pkg/proto";
+option go_package = "github.com/phuhao00/lufy/pkg/proto";
 
 // 基础消息头
 message MessageHeader {

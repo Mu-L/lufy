@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	"lufy/pkg/proto"
+	"github.com/phuhao00/lufy/pkg/proto"
 )
 
 // GameClient 游戏客户端

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // Message 消息接口
@@ -168,14 +168,8 @@ func (sys *ActorSystem) SpawnActor(actor Actor) error {
 	}
 
 	// 启动Actor
-	if baseActor, ok := actor.(*BaseActor); ok {
-		if err := baseActor.Start(actor); err != nil {
-			return err
-		}
-	} else {
-		if err := actor.OnStart(sys.ctx); err != nil {
-			return err
-		}
+	if err := actor.OnStart(sys.ctx); err != nil {
+		return err
 	}
 
 	sys.actors[id] = actor
@@ -200,10 +194,6 @@ func (sys *ActorSystem) Tell(actorID string, msg Message) error {
 		return fmt.Errorf("actor %s not found", actorID)
 	}
 
-	if baseActor, ok := actor.(*BaseActor); ok {
-		return baseActor.Tell(msg)
-	}
-
 	return actor.OnReceive(sys.ctx, msg)
 }
 
@@ -216,14 +206,8 @@ func (sys *ActorSystem) Shutdown() error {
 
 	// 停止所有Actor
 	for id, actor := range sys.actors {
-		if baseActor, ok := actor.(*BaseActor); ok {
-			if err := baseActor.Stop(actor); err != nil {
-				logger.Error(fmt.Sprintf("Error stopping actor %s: %v", id, err))
-			}
-		} else {
-			if err := actor.OnStop(sys.ctx); err != nil {
-				logger.Error(fmt.Sprintf("Error stopping actor %s: %v", id, err))
-			}
+		if err := actor.OnStop(sys.ctx); err != nil {
+			logger.Error(fmt.Sprintf("Error stopping actor %s: %v", id, err))
 		}
 	}
 

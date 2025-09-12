@@ -11,13 +11,13 @@ import (
 
 	"github.com/spf13/viper"
 
-	"lufy/internal/actor"
-	"lufy/internal/database"
-	"lufy/internal/discovery"
-	"lufy/internal/logger"
-	"lufy/internal/mq"
-	"lufy/internal/network"
-	"lufy/internal/rpc"
+	"github.com/phuhao00/lufy/internal/actor"
+	"github.com/phuhao00/lufy/internal/database"
+	"github.com/phuhao00/lufy/internal/discovery"
+	"github.com/phuhao00/lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/mq"
+	"github.com/phuhao00/lufy/internal/network"
+	"github.com/phuhao00/lufy/internal/rpc"
 )
 
 // ServerConfig 服务器配置

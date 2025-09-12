@@ -15,7 +15,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // MonitoringManager 监控管理器
@@ -34,20 +34,20 @@ type MonitoringManager struct {
 // MetricsCollector 指标收集器
 type MetricsCollector struct {
 	// 系统指标
-	cpuUsage    prometheus.Gauge
-	memoryUsage prometheus.Gauge
-	goroutines  prometheus.Gauge
-	heapSize    prometheus.Gauge
-	heapObjects prometheus.Gauge
-	gcDuration  prometheus.Summary
+	cpuUsage    *prometheus.GaugeVec
+	memoryUsage *prometheus.GaugeVec
+	goroutines  *prometheus.GaugeVec
+	heapSize    *prometheus.GaugeVec
+	heapObjects *prometheus.GaugeVec
+	gcDuration  *prometheus.SummaryVec
 
 	// 业务指标
-	connectionCount prometheus.Gauge
-	actorCount      prometheus.Gauge
-	messageCount    prometheus.Counter
-	errorCount      prometheus.Counter
-	requestDuration prometheus.Summary
-	dbConnections   prometheus.Gauge
+	connectionCount *prometheus.GaugeVec
+	actorCount      *prometheus.GaugeVec
+	messageCount    *prometheus.CounterVec
+	errorCount      *prometheus.CounterVec
+	requestDuration *prometheus.SummaryVec
+	dbConnections   *prometheus.GaugeVec
 
 	// 自定义指标
 	customMetrics map[string]prometheus.Metric
@@ -154,10 +154,6 @@ func NewMonitoringManager(nodeID, nodeType string, port int) (*MonitoringManager
 
 // NewMetricsCollector 创建指标收集器
 func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
-	labels := prometheus.Labels{
-		"node_id":   nodeID,
-		"node_type": nodeType,
-	}
 
 	return &MetricsCollector{
 		cpuUsage: prometheus.NewGaugeVec(
@@ -166,7 +162,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current CPU usage percentage",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		memoryUsage: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -174,7 +170,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current memory usage in bytes",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		goroutines: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -182,7 +178,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current number of goroutines",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		heapSize: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -190,7 +186,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current heap size in bytes",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		heapObjects: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -198,7 +194,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current number of heap objects",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		gcDuration: prometheus.NewSummaryVec(
 			prometheus.SummaryOpts{
@@ -206,7 +202,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Time spent in garbage collection",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		connectionCount: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -214,7 +210,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current number of active connections",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		actorCount: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -222,7 +218,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Current number of active actors",
 			},
 			[]string{"node_id", "node_type"},
-		).With(labels),
+		),
 
 		messageCount: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -230,7 +226,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Total number of messages processed",
 			},
 			[]string{"node_id", "node_type", "message_type"},
-		).With(labels),
+		),
 
 		errorCount: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -238,7 +234,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Total number of errors",
 			},
 			[]string{"node_id", "node_type", "error_type"},
-		).With(labels),
+		),
 
 		requestDuration: prometheus.NewSummaryVec(
 			prometheus.SummaryOpts{
@@ -246,7 +242,7 @@ func NewMetricsCollector(nodeID, nodeType string) (*MetricsCollector, error) {
 				Help: "Request duration in seconds",
 			},
 			[]string{"node_id", "node_type", "method", "endpoint"},
-		).With(labels),
+		),
 
 		customMetrics: make(map[string]prometheus.Metric),
 	}, nil
@@ -360,26 +356,26 @@ func (mm *MonitoringManager) collectMetrics() {
 func (mm *MonitoringManager) updateSystemMetrics() {
 	// CPU使用率
 	if cpuPercent, err := cpu.Percent(0, false); err == nil && len(cpuPercent) > 0 {
-		mm.metrics.cpuUsage.Set(cpuPercent[0])
+		mm.metrics.cpuUsage.WithLabelValues(mm.nodeID, mm.nodeType).Set(cpuPercent[0])
 	}
 
 	// 内存使用
 	if memInfo, err := mem.VirtualMemory(); err == nil {
-		mm.metrics.memoryUsage.Set(float64(memInfo.Used))
+		mm.metrics.memoryUsage.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(memInfo.Used))
 	}
 
 	// Goroutine数量
-	mm.metrics.goroutines.Set(float64(runtime.NumGoroutine()))
+	mm.metrics.goroutines.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(runtime.NumGoroutine()))
 
 	// 堆内存信息
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
-	mm.metrics.heapSize.Set(float64(memStats.HeapSys))
-	mm.metrics.heapObjects.Set(float64(memStats.HeapObjects))
+	mm.metrics.heapSize.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(memStats.HeapSys))
+	mm.metrics.heapObjects.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(memStats.HeapObjects))
 
 	// GC信息
 	if memStats.NumGC > 0 {
-		mm.metrics.gcDuration.Observe(float64(memStats.PauseNs[(memStats.NumGC+255)%256]) / 1e9)
+		mm.metrics.gcDuration.WithLabelValues(mm.nodeID, mm.nodeType).Observe(float64(memStats.PauseNs[(memStats.NumGC+255)%256]) / 1e9)
 	}
 }
 
@@ -457,30 +453,27 @@ func (mm *MonitoringManager) getSystemInfo(c *gin.Context) {
 
 // RecordMessage 记录消息指标
 func (mm *MonitoringManager) RecordMessage(messageType string) {
-	mm.metrics.messageCount.With(prometheus.Labels{"message_type": messageType}).Inc()
+	mm.metrics.messageCount.WithLabelValues(mm.nodeID, mm.nodeType, messageType).Inc()
 }
 
 // RecordError 记录错误指标
 func (mm *MonitoringManager) RecordError(errorType string) {
-	mm.metrics.errorCount.With(prometheus.Labels{"error_type": errorType}).Inc()
+	mm.metrics.errorCount.WithLabelValues(mm.nodeID, mm.nodeType, errorType).Inc()
 }
 
 // RecordRequestDuration 记录请求时长
 func (mm *MonitoringManager) RecordRequestDuration(method, endpoint string, duration time.Duration) {
-	mm.metrics.requestDuration.With(prometheus.Labels{
-		"method":   method,
-		"endpoint": endpoint,
-	}).Observe(duration.Seconds())
+	mm.metrics.requestDuration.WithLabelValues(mm.nodeID, mm.nodeType, method, endpoint).Observe(duration.Seconds())
 }
 
 // SetConnectionCount 设置连接数
 func (mm *MonitoringManager) SetConnectionCount(count int) {
-	mm.metrics.connectionCount.Set(float64(count))
+	mm.metrics.connectionCount.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(count))
 }
 
 // SetActorCount 设置Actor数量
 func (mm *MonitoringManager) SetActorCount(count int) {
-	mm.metrics.actorCount.Set(float64(count))
+	mm.metrics.actorCount.WithLabelValues(mm.nodeID, mm.nodeType).Set(float64(count))
 }
 
 // NewAlertManager 创建告警管理器

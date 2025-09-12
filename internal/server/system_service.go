@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"time"
 
-	"lufy/internal/logger"
-	"lufy/internal/mq"
-	"lufy/internal/pool"
-	"lufy/pkg/proto"
+	"github.com/phuhao00/lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/mq"
+	"github.com/phuhao00/lufy/internal/pool"
+	"github.com/phuhao00/lufy/pkg/proto"
 )
 
 // SystemService 系统服务
@@ -216,10 +216,13 @@ func (ss *SystemService) GetActorStats(ctx context.Context, req *proto.BaseReque
 		}, nil
 	}
 
-	actorStats := map[string]interface{}{
-		"count":  ss.server.actorSystem.GetActorCount(),
-		"actors": ss.server.actorSystem.ListActors(),
-	}
+	// TODO: 获取Actor系统统计信息
+	// actorStats := map[string]interface{}{
+	//	"total_actors":   actorSystem.GetActorCount(),
+	//	"active_actors":  actorSystem.GetActiveActorCount(),
+	//	"message_queue":  actorSystem.GetMessageQueueSize(),
+	//	"processed_msgs": actorSystem.GetProcessedMessageCount(),
+	// }
 
 	data, err := proto.Marshal(&proto.BaseResponse{
 		Header: req.Header,

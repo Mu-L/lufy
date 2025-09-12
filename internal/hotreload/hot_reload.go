@@ -12,7 +12,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // HotReloadManager 热更新管理器

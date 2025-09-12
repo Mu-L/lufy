@@ -470,7 +470,7 @@ func CalculateGameScore(gameState *GameState, playerID uint64) int {
 	score := 0
 
 	// 基础分数
-	if winner, hasWinner := CheckWinCondition(gameState); hasWinner && winner == playerID {
+	if hasWinner, winnerID := CheckWinCondition(gameState); hasWinner && winnerID == playerID {
 		score += 100 // 胜利奖励
 	}
 

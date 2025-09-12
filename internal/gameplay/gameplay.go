@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"lufy/internal/actor"
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/actor"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // GameplayManager 玩法管理器

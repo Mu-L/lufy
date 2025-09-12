@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // RedisConfig Redis配置
@@ -432,11 +432,39 @@ func (rm *RedisManager) Publish(channel string, message interface{}) error {
 }
 
 func (rm *RedisManager) Subscribe(channels ...string) *redis.PubSub {
-	return rm.client.Subscribe(rm.ctx, channels...)
+	switch rm.mode {
+	case "cluster":
+		if rm.clusterClient != nil {
+			return rm.clusterClient.Subscribe(rm.ctx, channels...)
+		}
+	case "sentinel":
+		if rm.sentinelClient != nil {
+			return rm.sentinelClient.Subscribe(rm.ctx, channels...)
+		}
+	default:
+		if client, ok := rm.client.(*redis.Client); ok {
+			return client.Subscribe(rm.ctx, channels...)
+		}
+	}
+	return nil
 }
 
 func (rm *RedisManager) PSubscribe(patterns ...string) *redis.PubSub {
-	return rm.client.PSubscribe(rm.ctx, patterns...)
+	switch rm.mode {
+	case "cluster":
+		if rm.clusterClient != nil {
+			return rm.clusterClient.PSubscribe(rm.ctx, patterns...)
+		}
+	case "sentinel":
+		if rm.sentinelClient != nil {
+			return rm.sentinelClient.PSubscribe(rm.ctx, patterns...)
+		}
+	default:
+		if client, ok := rm.client.(*redis.Client); ok {
+			return client.PSubscribe(rm.ctx, patterns...)
+		}
+	}
+	return nil
 }
 
 // UserCache 用户缓存

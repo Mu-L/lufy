@@ -12,7 +12,7 @@ import (
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // ServiceInfo 服务信息
@@ -54,19 +54,19 @@ type ETCDRegistry struct {
 // ETCDConfig ETCD集群配置
 type ETCDConfig struct {
 	Endpoints            []string      `yaml:"endpoints"`
-	DialTimeout         time.Duration `yaml:"dial_timeout"`
-	Username            string        `yaml:"username"`
-	Password            string        `yaml:"password"`
-	TLSEnabled          bool          `yaml:"tls_enabled"`
-	TLSCertFile         string        `yaml:"tls_cert_file"`
-	TLSKeyFile          string        `yaml:"tls_key_file"`
-	TLSCAFile           string        `yaml:"tls_ca_file"`
-	TLSInsecure         bool          `yaml:"tls_insecure"`
-	AutoSyncInterval    time.Duration `yaml:"auto_sync_interval"`
-	DialKeepAliveTime   time.Duration `yaml:"dial_keep_alive_time"`
+	DialTimeout          time.Duration `yaml:"dial_timeout"`
+	Username             string        `yaml:"username"`
+	Password             string        `yaml:"password"`
+	TLSEnabled           bool          `yaml:"tls_enabled"`
+	TLSCertFile          string        `yaml:"tls_cert_file"`
+	TLSKeyFile           string        `yaml:"tls_key_file"`
+	TLSCAFile            string        `yaml:"tls_ca_file"`
+	TLSInsecure          bool          `yaml:"tls_insecure"`
+	AutoSyncInterval     time.Duration `yaml:"auto_sync_interval"`
+	DialKeepAliveTime    time.Duration `yaml:"dial_keep_alive_time"`
 	DialKeepAliveTimeout time.Duration `yaml:"dial_keep_alive_timeout"`
-	MaxCallSendMsgSize  int           `yaml:"max_call_send_msg_size"`
-	MaxCallRecvMsgSize  int           `yaml:"max_call_recv_msg_size"`
+	MaxCallSendMsgSize   int           `yaml:"max_call_send_msg_size"`
+	MaxCallRecvMsgSize   int           `yaml:"max_call_recv_msg_size"`
 }
 
 // NewETCDRegistry 创建ETCD服务注册器
@@ -80,13 +80,13 @@ func NewETCDRegistry(config *ETCDConfig) (*ETCDRegistry, error) {
 		MaxCallSendMsgSize:   config.MaxCallSendMsgSize,
 		MaxCallRecvMsgSize:   config.MaxCallRecvMsgSize,
 	}
-	
+
 	// 设置认证
 	if config.Username != "" && config.Password != "" {
 		clientConfig.Username = config.Username
 		clientConfig.Password = config.Password
 	}
-	
+
 	// 设置TLS
 	if config.TLSEnabled {
 		tlsConfig, err := buildETCDTLSConfig(config)
@@ -95,7 +95,7 @@ func NewETCDRegistry(config *ETCDConfig) (*ETCDRegistry, error) {
 		}
 		clientConfig.TLS = tlsConfig
 	}
-	
+
 	client, err := clientv3.New(clientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create etcd client: %v", err)
@@ -134,7 +134,7 @@ func buildETCDTLSConfig(config *ETCDConfig) (*tls.Config, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.TLSInsecure,
 	}
-	
+
 	if config.TLSCertFile != "" && config.TLSKeyFile != "" {
 		cert, err := tls.LoadX509KeyPair(config.TLSCertFile, config.TLSKeyFile)
 		if err != nil {
@@ -142,20 +142,20 @@ func buildETCDTLSConfig(config *ETCDConfig) (*tls.Config, error) {
 		}
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
-	
+
 	if config.TLSCAFile != "" {
 		caCert, err := ioutil.ReadFile(config.TLSCAFile)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read CA cert: %v", err)
 		}
-		
+
 		caCertPool := x509.NewCertPool()
 		if !caCertPool.AppendCertsFromPEM(caCert) {
 			return nil, fmt.Errorf("failed to parse CA cert")
 		}
 		tlsConfig.RootCAs = caCertPool
 	}
-	
+
 	return tlsConfig, nil
 }
 
@@ -178,14 +178,14 @@ func (r *ETCDRegistry) clusterHealthCheck() {
 func (r *ETCDRegistry) checkETCDClusterHealth() {
 	ctx, cancel := context.WithTimeout(r.ctx, 5*time.Second)
 	defer cancel()
-	
+
 	// 检查集群成员状态
 	memberList, err := r.client.MemberList(ctx)
 	if err != nil {
 		logger.Errorf("Failed to get ETCD member list: %v", err)
 		return
 	}
-	
+
 	healthyMembers := 0
 	for _, member := range memberList.Members {
 		// 检查成员健康状态
@@ -193,12 +193,12 @@ func (r *ETCDRegistry) checkETCDClusterHealth() {
 			healthyMembers++
 		}
 	}
-	
-	logger.Debugf("ETCD cluster health: %d/%d members healthy", 
+
+	logger.Debugf("ETCD cluster health: %d/%d members healthy",
 		healthyMembers, len(memberList.Members))
-		
-	if healthyMembers < len(memberList.Members)/2 + 1 {
-		logger.Warnf("ETCD cluster may lose quorum: %d/%d members healthy", 
+
+	if healthyMembers < len(memberList.Members)/2+1 {
+		logger.Warnf("ETCD cluster may lose quorum: %d/%d members healthy",
 			healthyMembers, len(memberList.Members))
 	}
 }

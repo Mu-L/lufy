@@ -327,6 +327,1474 @@ func (m *NodeInfo) GetUpdateTime() uint32 {
 	return 0
 }
 
+// 好友请求消息
+type AddFriendRequest struct {
+	FriendId             uint64   `protobuf:"varint,1,opt,name=friend_id,json=friendId,proto3" json:"friend_id,omitempty"`
+	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddFriendRequest) Reset()         { *m = AddFriendRequest{} }
+func (m *AddFriendRequest) String() string { return proto.CompactTextString(m) }
+func (*AddFriendRequest) ProtoMessage()    {}
+
+func (m *AddFriendRequest) GetFriendId() uint64 {
+	if m != nil {
+		return m.FriendId
+	}
+	return 0
+}
+
+func (m *AddFriendRequest) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+// 接受好友请求消息
+type AcceptFriendRequest struct {
+	FriendId             uint64   `protobuf:"varint,1,opt,name=friend_id,json=friendId,proto3" json:"friend_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AcceptFriendRequest) Reset()         { *m = AcceptFriendRequest{} }
+func (m *AcceptFriendRequest) String() string { return proto.CompactTextString(m) }
+func (*AcceptFriendRequest) ProtoMessage()    {}
+
+func (m *AcceptFriendRequest) GetFriendId() uint64 {
+	if m != nil {
+		return m.FriendId
+	}
+	return 0
+}
+
+// 好友信息
+type FriendInfo struct {
+	UserId               uint64   `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Nickname             string   `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Level                int32    `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`
+	Avatar               string   `protobuf:"bytes,4,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Online               bool     `protobuf:"varint,5,opt,name=online,proto3" json:"online,omitempty"`
+	LastLoginTime        uint32   `protobuf:"varint,6,opt,name=last_login_time,json=lastLoginTime,proto3" json:"last_login_time,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *FriendInfo) Reset()         { *m = FriendInfo{} }
+func (m *FriendInfo) String() string { return proto.CompactTextString(m) }
+func (*FriendInfo) ProtoMessage()    {}
+
+func (m *FriendInfo) GetUserId() uint64 {
+	if m != nil {
+		return m.UserId
+	}
+	return 0
+}
+
+func (m *FriendInfo) GetNickname() string {
+	if m != nil {
+		return m.Nickname
+	}
+	return ""
+}
+
+func (m *FriendInfo) GetLevel() int32 {
+	if m != nil {
+		return m.Level
+	}
+	return 0
+}
+
+func (m *FriendInfo) GetAvatar() string {
+	if m != nil {
+		return m.Avatar
+	}
+	return ""
+}
+
+func (m *FriendInfo) GetOnline() bool {
+	if m != nil {
+		return m.Online
+	}
+	return false
+}
+
+func (m *FriendInfo) GetLastLoginTime() uint32 {
+	if m != nil {
+		return m.LastLoginTime
+	}
+	return 0
+}
+
+// 好友列表响应
+type FriendListResponse struct {
+	Friends              []*FriendInfo `protobuf:"bytes,1,rep,name=friends,proto3" json:"friends,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *FriendListResponse) Reset()         { *m = FriendListResponse{} }
+func (m *FriendListResponse) String() string { return proto.CompactTextString(m) }
+func (*FriendListResponse) ProtoMessage()    {}
+
+func (m *FriendListResponse) GetFriends() []*FriendInfo {
+	if m != nil {
+		return m.Friends
+	}
+	return nil
+}
+
+// 开始游戏请求
+type StartGameRequest struct {
+	RoomId               uint64   `protobuf:"varint,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	GameType             int32    `protobuf:"varint,2,opt,name=game_type,json=gameType,proto3" json:"game_type,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *StartGameRequest) Reset()         { *m = StartGameRequest{} }
+func (m *StartGameRequest) String() string { return proto.CompactTextString(m) }
+func (*StartGameRequest) ProtoMessage()    {}
+
+func (m *StartGameRequest) GetRoomId() uint64 {
+	if m != nil {
+		return m.RoomId
+	}
+	return 0
+}
+
+func (m *StartGameRequest) GetGameType() int32 {
+	if m != nil {
+		return m.GameType
+	}
+	return 0
+}
+
+// 结束游戏请求
+type EndGameRequest struct {
+	GameId               uint64   `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	Winner               uint64   `protobuf:"varint,2,opt,name=winner,proto3" json:"winner,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EndGameRequest) Reset()         { *m = EndGameRequest{} }
+func (m *EndGameRequest) String() string { return proto.CompactTextString(m) }
+func (*EndGameRequest) ProtoMessage()    {}
+
+func (m *EndGameRequest) GetGameId() uint64 {
+	if m != nil {
+		return m.GameId
+	}
+	return 0
+}
+
+func (m *EndGameRequest) GetWinner() uint64 {
+	if m != nil {
+		return m.Winner
+	}
+	return 0
+}
+
+// 玩家操作请求
+type PlayerActionRequest struct {
+	GameId               uint64   `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	ActionType           int32    `protobuf:"varint,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	ActionData           []byte   `protobuf:"bytes,3,opt,name=action_data,json=actionData,proto3" json:"action_data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PlayerActionRequest) Reset()         { *m = PlayerActionRequest{} }
+func (m *PlayerActionRequest) String() string { return proto.CompactTextString(m) }
+func (*PlayerActionRequest) ProtoMessage()    {}
+
+func (m *PlayerActionRequest) GetGameId() uint64 {
+	if m != nil {
+		return m.GameId
+	}
+	return 0
+}
+
+func (m *PlayerActionRequest) GetActionType() int32 {
+	if m != nil {
+		return m.ActionType
+	}
+	return 0
+}
+
+func (m *PlayerActionRequest) GetActionData() []byte {
+	if m != nil {
+		return m.ActionData
+	}
+	return nil
+}
+
+// 游戏状态请求
+type GameStateRequest struct {
+	GameId               uint64   `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GameStateRequest) Reset()         { *m = GameStateRequest{} }
+func (m *GameStateRequest) String() string { return proto.CompactTextString(m) }
+func (*GameStateRequest) ProtoMessage()    {}
+
+func (m *GameStateRequest) GetGameId() uint64 {
+	if m != nil {
+		return m.GameId
+	}
+	return 0
+}
+
+// 游戏状态响应
+type GameStateResponse struct {
+	GameId               uint64      `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	Status               int32       `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	CurrentPlayer        uint64      `protobuf:"varint,3,opt,name=current_player,json=currentPlayer,proto3" json:"current_player,omitempty"`
+	Players              []*GamePlayerInfo `protobuf:"bytes,4,rep,name=players,proto3" json:"players,omitempty"`
+	GameData             []byte      `protobuf:"bytes,5,opt,name=game_data,json=gameData,proto3" json:"game_data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GameStateResponse) Reset()         { *m = GameStateResponse{} }
+func (m *GameStateResponse) String() string { return proto.CompactTextString(m) }
+func (*GameStateResponse) ProtoMessage()    {}
+
+func (m *GameStateResponse) GetGameId() uint64 {
+	if m != nil {
+		return m.GameId
+	}
+	return 0
+}
+
+func (m *GameStateResponse) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *GameStateResponse) GetCurrentPlayer() uint64 {
+	if m != nil {
+		return m.CurrentPlayer
+	}
+	return 0
+}
+
+func (m *GameStateResponse) GetPlayers() []*GamePlayerInfo {
+	if m != nil {
+		return m.Players
+	}
+	return nil
+}
+
+func (m *GameStateResponse) GetGameData() []byte {
+	if m != nil {
+		return m.GameData
+	}
+	return nil
+}
+
+// 游戏玩家信息
+type GamePlayerInfo struct {
+	UserId               uint64   `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Nickname             string   `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Level                int32    `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty"`
+	Score                int64    `protobuf:"varint,4,opt,name=score,proto3" json:"score,omitempty"`
+	Status               int32    `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GamePlayerInfo) Reset()         { *m = GamePlayerInfo{} }
+func (m *GamePlayerInfo) String() string { return proto.CompactTextString(m) }
+func (*GamePlayerInfo) ProtoMessage()    {}
+
+func (m *GamePlayerInfo) GetUserId() uint64 {
+	if m != nil {
+		return m.UserId
+	}
+	return 0
+}
+
+func (m *GamePlayerInfo) GetNickname() string {
+	if m != nil {
+		return m.Nickname
+	}
+	return ""
+}
+
+func (m *GamePlayerInfo) GetLevel() int32 {
+	if m != nil {
+		return m.Level
+	}
+	return 0
+}
+
+func (m *GamePlayerInfo) GetScore() int64 {
+	if m != nil {
+		return m.Score
+	}
+	return 0
+}
+
+func (m *GamePlayerInfo) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+// 创建房间请求
+type CreateRoomRequest struct {
+	RoomName             string   `protobuf:"bytes,1,opt,name=room_name,json=roomName,proto3" json:"room_name,omitempty"`
+	GameType             int32    `protobuf:"varint,2,opt,name=game_type,json=gameType,proto3" json:"game_type,omitempty"`
+	MaxPlayers           int32    `protobuf:"varint,3,opt,name=max_players,json=maxPlayers,proto3" json:"max_players,omitempty"`
+	IsPrivate            bool     `protobuf:"varint,4,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
+	Password             string   `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CreateRoomRequest) Reset()         { *m = CreateRoomRequest{} }
+func (m *CreateRoomRequest) String() string { return proto.CompactTextString(m) }
+func (*CreateRoomRequest) ProtoMessage()    {}
+
+func (m *CreateRoomRequest) GetRoomName() string {
+	if m != nil {
+		return m.RoomName
+	}
+	return ""
+}
+
+func (m *CreateRoomRequest) GetGameType() int32 {
+	if m != nil {
+		return m.GameType
+	}
+	return 0
+}
+
+func (m *CreateRoomRequest) GetMaxPlayers() int32 {
+	if m != nil {
+		return m.MaxPlayers
+	}
+	return 0
+}
+
+func (m *CreateRoomRequest) GetIsPrivate() bool {
+	if m != nil {
+		return m.IsPrivate
+	}
+	return false
+}
+
+func (m *CreateRoomRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+// 加入房间请求
+type JoinRoomRequest struct {
+	RoomId               uint64   `protobuf:"varint,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JoinRoomRequest) Reset()         { *m = JoinRoomRequest{} }
+func (m *JoinRoomRequest) String() string { return proto.CompactTextString(m) }
+func (*JoinRoomRequest) ProtoMessage()    {}
+
+func (m *JoinRoomRequest) GetRoomId() uint64 {
+	if m != nil {
+		return m.RoomId
+	}
+	return 0
+}
+
+func (m *JoinRoomRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+// 房间信息
+type RoomInfo struct {
+	RoomId               uint64            `protobuf:"varint,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	RoomName             string            `protobuf:"bytes,2,opt,name=room_name,json=roomName,proto3" json:"room_name,omitempty"`
+	GameType             int32             `protobuf:"varint,3,opt,name=game_type,json=gameType,proto3" json:"game_type,omitempty"`
+	CurrentPlayers       int32             `protobuf:"varint,4,opt,name=current_players,json=currentPlayers,proto3" json:"current_players,omitempty"`
+	MaxPlayers           int32             `protobuf:"varint,5,opt,name=max_players,json=maxPlayers,proto3" json:"max_players,omitempty"`
+	Status               int32             `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	IsPrivate            bool              `protobuf:"varint,7,opt,name=is_private,json=isPrivate,proto3" json:"is_private,omitempty"`
+	Owner                *GamePlayerInfo   `protobuf:"bytes,8,opt,name=owner,proto3" json:"owner,omitempty"`
+	Players              []*GamePlayerInfo `protobuf:"bytes,9,rep,name=players,proto3" json:"players,omitempty"`
+	CreatedTime          uint32            `protobuf:"varint,10,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *RoomInfo) Reset()         { *m = RoomInfo{} }
+func (m *RoomInfo) String() string { return proto.CompactTextString(m) }
+func (*RoomInfo) ProtoMessage()    {}
+
+func (m *RoomInfo) GetRoomId() uint64 {
+	if m != nil {
+		return m.RoomId
+	}
+	return 0
+}
+
+func (m *RoomInfo) GetRoomName() string {
+	if m != nil {
+		return m.RoomName
+	}
+	return ""
+}
+
+func (m *RoomInfo) GetGameType() int32 {
+	if m != nil {
+		return m.GameType
+	}
+	return 0
+}
+
+func (m *RoomInfo) GetCurrentPlayers() int32 {
+	if m != nil {
+		return m.CurrentPlayers
+	}
+	return 0
+}
+
+func (m *RoomInfo) GetMaxPlayers() int32 {
+	if m != nil {
+		return m.MaxPlayers
+	}
+	return 0
+}
+
+func (m *RoomInfo) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *RoomInfo) GetIsPrivate() bool {
+	if m != nil {
+		return m.IsPrivate
+	}
+	return false
+}
+
+func (m *RoomInfo) GetOwner() *GamePlayerInfo {
+	if m != nil {
+		return m.Owner
+	}
+	return nil
+}
+
+func (m *RoomInfo) GetPlayers() []*GamePlayerInfo {
+	if m != nil {
+		return m.Players
+	}
+	return nil
+}
+
+func (m *RoomInfo) GetCreatedTime() uint32 {
+	if m != nil {
+		return m.CreatedTime
+	}
+	return 0
+}
+
+// 房间列表响应
+type RoomListResponse struct {
+	Rooms                []*RoomInfo `protobuf:"bytes,1,rep,name=rooms,proto3" json:"rooms,omitempty"`
+	Total                int32       `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *RoomListResponse) Reset()         { *m = RoomListResponse{} }
+func (m *RoomListResponse) String() string { return proto.CompactTextString(m) }
+func (*RoomListResponse) ProtoMessage()    {}
+
+func (m *RoomListResponse) GetRooms() []*RoomInfo {
+	if m != nil {
+		return m.Rooms
+	}
+	return nil
+}
+
+func (m *RoomListResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+// 发送消息请求
+type SendMessageRequest struct {
+	ToUserId             uint64   `protobuf:"varint,1,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	ChannelType          int32    `protobuf:"varint,2,opt,name=channel_type,json=channelType,proto3" json:"channel_type,omitempty"`
+	ChannelId            uint64   `protobuf:"varint,3,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	MessageType          int32    `protobuf:"varint,4,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
+	Content              string   `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SendMessageRequest) Reset()         { *m = SendMessageRequest{} }
+func (m *SendMessageRequest) String() string { return proto.CompactTextString(m) }
+func (*SendMessageRequest) ProtoMessage()    {}
+
+func (m *SendMessageRequest) GetToUserId() uint64 {
+	if m != nil {
+		return m.ToUserId
+	}
+	return 0
+}
+
+func (m *SendMessageRequest) GetChannelType() int32 {
+	if m != nil {
+		return m.ChannelType
+	}
+	return 0
+}
+
+func (m *SendMessageRequest) GetChannelId() uint64 {
+	if m != nil {
+		return m.ChannelId
+	}
+	return 0
+}
+
+func (m *SendMessageRequest) GetMessageType() int32 {
+	if m != nil {
+		return m.MessageType
+	}
+	return 0
+}
+
+func (m *SendMessageRequest) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+// 聊天历史请求
+type ChatHistoryRequest struct {
+	ChannelType          int32    `protobuf:"varint,1,opt,name=channel_type,json=channelType,proto3" json:"channel_type,omitempty"`
+	ChannelId            uint64   `protobuf:"varint,2,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	Limit                int32    `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset               int32    `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ChatHistoryRequest) Reset()         { *m = ChatHistoryRequest{} }
+func (m *ChatHistoryRequest) String() string { return proto.CompactTextString(m) }
+func (*ChatHistoryRequest) ProtoMessage()    {}
+
+func (m *ChatHistoryRequest) GetChannelType() int32 {
+	if m != nil {
+		return m.ChannelType
+	}
+	return 0
+}
+
+func (m *ChatHistoryRequest) GetChannelId() uint64 {
+	if m != nil {
+		return m.ChannelId
+	}
+	return 0
+}
+
+func (m *ChatHistoryRequest) GetLimit() int32 {
+	if m != nil {
+		return m.Limit
+	}
+	return 0
+}
+
+func (m *ChatHistoryRequest) GetOffset() int32 {
+	if m != nil {
+		return m.Offset
+	}
+	return 0
+}
+
+// 聊天消息
+type ChatMessage struct {
+	MessageId            uint64   `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	FromUserId           uint64   `protobuf:"varint,2,opt,name=from_user_id,json=fromUserId,proto3" json:"from_user_id,omitempty"`
+	FromNickname         string   `protobuf:"bytes,3,opt,name=from_nickname,json=fromNickname,proto3" json:"from_nickname,omitempty"`
+	ToUserId             uint64   `protobuf:"varint,4,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	ChannelType          int32    `protobuf:"varint,5,opt,name=channel_type,json=channelType,proto3" json:"channel_type,omitempty"`
+	ChannelId            uint64   `protobuf:"varint,6,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	MessageType          int32    `protobuf:"varint,7,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
+	Content              string   `protobuf:"bytes,8,opt,name=content,proto3" json:"content,omitempty"`
+	SendTime             uint32   `protobuf:"varint,9,opt,name=send_time,json=sendTime,proto3" json:"send_time,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ChatMessage) Reset()         { *m = ChatMessage{} }
+func (m *ChatMessage) String() string { return proto.CompactTextString(m) }
+func (*ChatMessage) ProtoMessage()    {}
+
+func (m *ChatMessage) GetMessageId() uint64 {
+	if m != nil {
+		return m.MessageId
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetFromUserId() uint64 {
+	if m != nil {
+		return m.FromUserId
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetFromNickname() string {
+	if m != nil {
+		return m.FromNickname
+	}
+	return ""
+}
+
+func (m *ChatMessage) GetToUserId() uint64 {
+	if m != nil {
+		return m.ToUserId
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetChannelType() int32 {
+	if m != nil {
+		return m.ChannelType
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetChannelId() uint64 {
+	if m != nil {
+		return m.ChannelId
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetMessageType() int32 {
+	if m != nil {
+		return m.MessageType
+	}
+	return 0
+}
+
+func (m *ChatMessage) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *ChatMessage) GetSendTime() uint32 {
+	if m != nil {
+		return m.SendTime
+	}
+	return 0
+}
+
+// 聊天历史响应
+type ChatHistoryResponse struct {
+	Messages             []*ChatMessage `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
+	Total                int32          `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
+}
+
+func (m *ChatHistoryResponse) Reset()         { *m = ChatHistoryResponse{} }
+func (m *ChatHistoryResponse) String() string { return proto.CompactTextString(m) }
+func (*ChatHistoryResponse) ProtoMessage()    {}
+
+func (m *ChatHistoryResponse) GetMessages() []*ChatMessage {
+	if m != nil {
+		return m.Messages
+	}
+	return nil
+}
+
+func (m *ChatHistoryResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+// 屏蔽用户请求
+type BlockUserRequest struct {
+	TargetUserId         uint64   `protobuf:"varint,1,opt,name=target_user_id,json=targetUserId,proto3" json:"target_user_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BlockUserRequest) Reset()         { *m = BlockUserRequest{} }
+func (m *BlockUserRequest) String() string { return proto.CompactTextString(m) }
+func (*BlockUserRequest) ProtoMessage()    {}
+
+func (m *BlockUserRequest) GetTargetUserId() uint64 {
+	if m != nil {
+		return m.TargetUserId
+	}
+	return 0
+}
+
+// 邮件列表请求
+type MailListRequest struct {
+	Limit                int32    `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset               int32    `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	MailType             int32    `protobuf:"varint,3,opt,name=mail_type,json=mailType,proto3" json:"mail_type,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MailListRequest) Reset()         { *m = MailListRequest{} }
+func (m *MailListRequest) String() string { return proto.CompactTextString(m) }
+func (*MailListRequest) ProtoMessage()    {}
+
+func (m *MailListRequest) GetLimit() int32 {
+	if m != nil {
+		return m.Limit
+	}
+	return 0
+}
+
+func (m *MailListRequest) GetOffset() int32 {
+	if m != nil {
+		return m.Offset
+	}
+	return 0
+}
+
+func (m *MailListRequest) GetMailType() int32 {
+	if m != nil {
+		return m.MailType
+	}
+	return 0
+}
+
+// 邮件信息
+type MailInfo struct {
+	MailId               uint64      `protobuf:"varint,1,opt,name=mail_id,json=mailId,proto3" json:"mail_id,omitempty"`
+	FromUserId           uint64      `protobuf:"varint,2,opt,name=from_user_id,json=fromUserId,proto3" json:"from_user_id,omitempty"`
+	FromNickname         string      `protobuf:"bytes,3,opt,name=from_nickname,json=fromNickname,proto3" json:"from_nickname,omitempty"`
+	ToUserId             uint64      `protobuf:"varint,4,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	MailType             int32       `protobuf:"varint,5,opt,name=mail_type,json=mailType,proto3" json:"mail_type,omitempty"`
+	Title                string      `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`
+	Content              string      `protobuf:"bytes,7,opt,name=content,proto3" json:"content,omitempty"`
+	Rewards              []*Reward   `protobuf:"bytes,8,rep,name=rewards,proto3" json:"rewards,omitempty"`
+	IsRead               bool        `protobuf:"varint,9,opt,name=is_read,json=isRead,proto3" json:"is_read,omitempty"`
+	IsClaimed            bool        `protobuf:"varint,10,opt,name=is_claimed,json=isClaimed,proto3" json:"is_claimed,omitempty"`
+	SendTime             uint32      `protobuf:"varint,11,opt,name=send_time,json=sendTime,proto3" json:"send_time,omitempty"`
+	ExpireTime           uint32      `protobuf:"varint,12,opt,name=expire_time,json=expireTime,proto3" json:"expire_time,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *MailInfo) Reset()         { *m = MailInfo{} }
+func (m *MailInfo) String() string { return proto.CompactTextString(m) }
+func (*MailInfo) ProtoMessage()    {}
+
+func (m *MailInfo) GetMailId() uint64 {
+	if m != nil {
+		return m.MailId
+	}
+	return 0
+}
+
+func (m *MailInfo) GetFromUserId() uint64 {
+	if m != nil {
+		return m.FromUserId
+	}
+	return 0
+}
+
+func (m *MailInfo) GetFromNickname() string {
+	if m != nil {
+		return m.FromNickname
+	}
+	return ""
+}
+
+func (m *MailInfo) GetToUserId() uint64 {
+	if m != nil {
+		return m.ToUserId
+	}
+	return 0
+}
+
+func (m *MailInfo) GetMailType() int32 {
+	if m != nil {
+		return m.MailType
+	}
+	return 0
+}
+
+func (m *MailInfo) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+func (m *MailInfo) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *MailInfo) GetRewards() []*Reward {
+	if m != nil {
+		return m.Rewards
+	}
+	return nil
+}
+
+func (m *MailInfo) GetIsRead() bool {
+	if m != nil {
+		return m.IsRead
+	}
+	return false
+}
+
+func (m *MailInfo) GetIsClaimed() bool {
+	if m != nil {
+		return m.IsClaimed
+	}
+	return false
+}
+
+func (m *MailInfo) GetSendTime() uint32 {
+	if m != nil {
+		return m.SendTime
+	}
+	return 0
+}
+
+func (m *MailInfo) GetExpireTime() uint32 {
+	if m != nil {
+		return m.ExpireTime
+	}
+	return 0
+}
+
+// 奖励信息
+type Reward struct {
+	ItemId               uint32   `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	ItemType             int32    `protobuf:"varint,2,opt,name=item_type,json=itemType,proto3" json:"item_type,omitempty"`
+	Quantity             uint32   `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Reward) Reset()         { *m = Reward{} }
+func (m *Reward) String() string { return proto.CompactTextString(m) }
+func (*Reward) ProtoMessage()    {}
+
+func (m *Reward) GetItemId() uint32 {
+	if m != nil {
+		return m.ItemId
+	}
+	return 0
+}
+
+func (m *Reward) GetItemType() int32 {
+	if m != nil {
+		return m.ItemType
+	}
+	return 0
+}
+
+func (m *Reward) GetQuantity() uint32 {
+	if m != nil {
+		return m.Quantity
+	}
+	return 0
+}
+
+// 邮件列表响应
+type MailListResponse struct {
+	Mails                []*MailInfo `protobuf:"bytes,1,rep,name=mails,proto3" json:"mails,omitempty"`
+	Total                int32       `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *MailListResponse) Reset()         { *m = MailListResponse{} }
+func (m *MailListResponse) String() string { return proto.CompactTextString(m) }
+func (*MailListResponse) ProtoMessage()    {}
+
+func (m *MailListResponse) GetMails() []*MailInfo {
+	if m != nil {
+		return m.Mails
+	}
+	return nil
+}
+
+func (m *MailListResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+// 邮件操作请求
+type MailOperationRequest struct {
+	MailId               uint64   `protobuf:"varint,1,opt,name=mail_id,json=mailId,proto3" json:"mail_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MailOperationRequest) Reset()         { *m = MailOperationRequest{} }
+func (m *MailOperationRequest) String() string { return proto.CompactTextString(m) }
+func (*MailOperationRequest) ProtoMessage()    {}
+
+func (m *MailOperationRequest) GetMailId() uint64 {
+	if m != nil {
+		return m.MailId
+	}
+	return 0
+}
+
+// 发送邮件请求
+type SendMailRequest struct {
+	ToUserId             uint64    `protobuf:"varint,1,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	MailType             int32     `protobuf:"varint,2,opt,name=mail_type,json=mailType,proto3" json:"mail_type,omitempty"`
+	Title                string    `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Content              string    `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	Rewards              []*Reward `protobuf:"bytes,5,rep,name=rewards,proto3" json:"rewards,omitempty"`
+	ExpireTime           uint32    `protobuf:"varint,6,opt,name=expire_time,json=expireTime,proto3" json:"expire_time,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *SendMailRequest) Reset()         { *m = SendMailRequest{} }
+func (m *SendMailRequest) String() string { return proto.CompactTextString(m) }
+func (*SendMailRequest) ProtoMessage()    {}
+
+func (m *SendMailRequest) GetToUserId() uint64 {
+	if m != nil {
+		return m.ToUserId
+	}
+	return 0
+}
+
+func (m *SendMailRequest) GetMailType() int32 {
+	if m != nil {
+		return m.MailType
+	}
+	return 0
+}
+
+func (m *SendMailRequest) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+func (m *SendMailRequest) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *SendMailRequest) GetRewards() []*Reward {
+	if m != nil {
+		return m.Rewards
+	}
+	return nil
+}
+
+func (m *SendMailRequest) GetExpireTime() uint32 {
+	if m != nil {
+		return m.ExpireTime
+	}
+	return 0
+}
+
+// GM命令请求
+type GMCommandRequest struct {
+	Command              string   `protobuf:"bytes,1,opt,name=command,proto3" json:"command,omitempty"`
+	Args                 []string `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GMCommandRequest) Reset()         { *m = GMCommandRequest{} }
+func (m *GMCommandRequest) String() string { return proto.CompactTextString(m) }
+func (*GMCommandRequest) ProtoMessage()    {}
+
+func (m *GMCommandRequest) GetCommand() string {
+	if m != nil {
+		return m.Command
+	}
+	return ""
+}
+
+func (m *GMCommandRequest) GetArgs() []string {
+	if m != nil {
+		return m.Args
+	}
+	return nil
+}
+
+// 踢出用户请求
+type KickUserRequest struct {
+	TargetUserId         uint64   `protobuf:"varint,1,opt,name=target_user_id,json=targetUserId,proto3" json:"target_user_id,omitempty"`
+	Reason               string   `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *KickUserRequest) Reset()         { *m = KickUserRequest{} }
+func (m *KickUserRequest) String() string { return proto.CompactTextString(m) }
+func (*KickUserRequest) ProtoMessage()    {}
+
+func (m *KickUserRequest) GetTargetUserId() uint64 {
+	if m != nil {
+		return m.TargetUserId
+	}
+	return 0
+}
+
+func (m *KickUserRequest) GetReason() string {
+	if m != nil {
+		return m.Reason
+	}
+	return ""
+}
+
+// 封禁用户请求
+type BanUserRequest struct {
+	TargetUserId         uint64   `protobuf:"varint,1,opt,name=target_user_id,json=targetUserId,proto3" json:"target_user_id,omitempty"`
+	Reason               string   `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	Duration             uint32   `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BanUserRequest) Reset()         { *m = BanUserRequest{} }
+func (m *BanUserRequest) String() string { return proto.CompactTextString(m) }
+func (*BanUserRequest) ProtoMessage()    {}
+
+func (m *BanUserRequest) GetTargetUserId() uint64 {
+	if m != nil {
+		return m.TargetUserId
+	}
+	return 0
+}
+
+func (m *BanUserRequest) GetReason() string {
+	if m != nil {
+		return m.Reason
+	}
+	return ""
+}
+
+func (m *BanUserRequest) GetDuration() uint32 {
+	if m != nil {
+		return m.Duration
+	}
+	return 0
+}
+
+// 解封用户请求
+type UnbanUserRequest struct {
+	TargetUserId         uint64   `protobuf:"varint,1,opt,name=target_user_id,json=targetUserId,proto3" json:"target_user_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UnbanUserRequest) Reset()         { *m = UnbanUserRequest{} }
+func (m *UnbanUserRequest) String() string { return proto.CompactTextString(m) }
+func (*UnbanUserRequest) ProtoMessage()    {}
+
+func (m *UnbanUserRequest) GetTargetUserId() uint64 {
+	if m != nil {
+		return m.TargetUserId
+	}
+	return 0
+}
+
+// 发送公告请求
+type SendNoticeRequest struct {
+	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Content              string   `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	NoticeType           int32    `protobuf:"varint,3,opt,name=notice_type,json=noticeType,proto3" json:"notice_type,omitempty"`
+	TargetUsers          []uint64 `protobuf:"varint,4,rep,packed,name=target_users,json=targetUsers,proto3" json:"target_users,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SendNoticeRequest) Reset()         { *m = SendNoticeRequest{} }
+func (m *SendNoticeRequest) String() string { return proto.CompactTextString(m) }
+func (*SendNoticeRequest) ProtoMessage()    {}
+
+func (m *SendNoticeRequest) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+func (m *SendNoticeRequest) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *SendNoticeRequest) GetNoticeType() int32 {
+	if m != nil {
+		return m.NoticeType
+	}
+	return 0
+}
+
+func (m *SendNoticeRequest) GetTargetUsers() []uint64 {
+	if m != nil {
+		return m.TargetUsers
+	}
+	return nil
+}
+
+// 服务信息
+type ServiceInfo struct {
+	ServiceId            string   `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	ServiceType          string   `protobuf:"bytes,2,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
+	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Port                 int32    `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	Status               string   `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	LastHeartbeat        uint32   `protobuf:"varint,6,opt,name=last_heartbeat,json=lastHeartbeat,proto3" json:"last_heartbeat,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ServiceInfo) Reset()         { *m = ServiceInfo{} }
+func (m *ServiceInfo) String() string { return proto.CompactTextString(m) }
+func (*ServiceInfo) ProtoMessage()    {}
+
+func (m *ServiceInfo) GetServiceId() string {
+	if m != nil {
+		return m.ServiceId
+	}
+	return ""
+}
+
+func (m *ServiceInfo) GetServiceType() string {
+	if m != nil {
+		return m.ServiceType
+	}
+	return ""
+}
+
+func (m *ServiceInfo) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *ServiceInfo) GetPort() int32 {
+	if m != nil {
+		return m.Port
+	}
+	return 0
+}
+
+func (m *ServiceInfo) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+func (m *ServiceInfo) GetLastHeartbeat() uint32 {
+	if m != nil {
+		return m.LastHeartbeat
+	}
+	return 0
+}
+
+// 服务列表响应
+type ServiceListResponse struct {
+	Services             []*ServiceInfo `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	Total                int32          `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
+}
+
+func (m *ServiceListResponse) Reset()         { *m = ServiceListResponse{} }
+func (m *ServiceListResponse) String() string { return proto.CompactTextString(m) }
+func (*ServiceListResponse) ProtoMessage()    {}
+
+func (m *ServiceListResponse) GetServices() []*ServiceInfo {
+	if m != nil {
+		return m.Services
+	}
+	return nil
+}
+
+func (m *ServiceListResponse) GetTotal() int32 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+// 集群状态响应
+type ClusterStatusResponse struct {
+	TotalServices        int32                      `protobuf:"varint,1,opt,name=total_services,json=totalServices,proto3" json:"total_services,omitempty"`
+	OnlineServices       int32                      `protobuf:"varint,2,opt,name=online_services,json=onlineServices,proto3" json:"online_services,omitempty"`
+	ServiceStats         map[string]int32           `protobuf:"bytes,3,rep,name=service_stats,json=serviceStats,proto3" json:"service_stats,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	SystemInfo           *SystemInfo                `protobuf:"bytes,4,opt,name=system_info,json=systemInfo,proto3" json:"system_info,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *ClusterStatusResponse) Reset()         { *m = ClusterStatusResponse{} }
+func (m *ClusterStatusResponse) String() string { return proto.CompactTextString(m) }
+func (*ClusterStatusResponse) ProtoMessage()    {}
+
+func (m *ClusterStatusResponse) GetTotalServices() int32 {
+	if m != nil {
+		return m.TotalServices
+	}
+	return 0
+}
+
+func (m *ClusterStatusResponse) GetOnlineServices() int32 {
+	if m != nil {
+		return m.OnlineServices
+	}
+	return 0
+}
+
+func (m *ClusterStatusResponse) GetServiceStats() map[string]int32 {
+	if m != nil {
+		return m.ServiceStats
+	}
+	return nil
+}
+
+func (m *ClusterStatusResponse) GetSystemInfo() *SystemInfo {
+	if m != nil {
+		return m.SystemInfo
+	}
+	return nil
+}
+
+// 系统信息
+type SystemInfo struct {
+	CpuUsage             float32  `protobuf:"fixed32,1,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
+	MemoryUsage          float32  `protobuf:"fixed32,2,opt,name=memory_usage,json=memoryUsage,proto3" json:"memory_usage,omitempty"`
+	DiskUsage            float32  `protobuf:"fixed32,3,opt,name=disk_usage,json=diskUsage,proto3" json:"disk_usage,omitempty"`
+	Uptime               uint32   `protobuf:"varint,4,opt,name=uptime,proto3" json:"uptime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SystemInfo) Reset()         { *m = SystemInfo{} }
+func (m *SystemInfo) String() string { return proto.CompactTextString(m) }
+func (*SystemInfo) ProtoMessage()    {}
+
+func (m *SystemInfo) GetCpuUsage() float32 {
+	if m != nil {
+		return m.CpuUsage
+	}
+	return 0
+}
+
+func (m *SystemInfo) GetMemoryUsage() float32 {
+	if m != nil {
+		return m.MemoryUsage
+	}
+	return 0
+}
+
+func (m *SystemInfo) GetDiskUsage() float32 {
+	if m != nil {
+		return m.DiskUsage
+	}
+	return 0
+}
+
+func (m *SystemInfo) GetUptime() uint32 {
+	if m != nil {
+		return m.Uptime
+	}
+	return 0
+}
+
+// 广播消息请求
+type BroadcastMessageRequest struct {
+	MessageType          string   `protobuf:"bytes,1,opt,name=message_type,json=messageType,proto3" json:"message_type,omitempty"`
+	Content              string   `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	TargetServices       []string `protobuf:"bytes,3,rep,name=target_services,json=targetServices,proto3" json:"target_services,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BroadcastMessageRequest) Reset()         { *m = BroadcastMessageRequest{} }
+func (m *BroadcastMessageRequest) String() string { return proto.CompactTextString(m) }
+func (*BroadcastMessageRequest) ProtoMessage()    {}
+
+func (m *BroadcastMessageRequest) GetMessageType() string {
+	if m != nil {
+		return m.MessageType
+	}
+	return ""
+}
+
+func (m *BroadcastMessageRequest) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *BroadcastMessageRequest) GetTargetServices() []string {
+	if m != nil {
+		return m.TargetServices
+	}
+	return nil
+}
+
+// 服务操作请求
+type ServiceOperationRequest struct {
+	ServiceId            string   `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	ServiceType          string   `protobuf:"bytes,2,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
+	Operation            string   `protobuf:"bytes,3,opt,name=operation,proto3" json:"operation,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ServiceOperationRequest) Reset()         { *m = ServiceOperationRequest{} }
+func (m *ServiceOperationRequest) String() string { return proto.CompactTextString(m) }
+func (*ServiceOperationRequest) ProtoMessage()    {}
+
+func (m *ServiceOperationRequest) GetServiceId() string {
+	if m != nil {
+		return m.ServiceId
+	}
+	return ""
+}
+
+func (m *ServiceOperationRequest) GetServiceType() string {
+	if m != nil {
+		return m.ServiceType
+	}
+	return ""
+}
+
+func (m *ServiceOperationRequest) GetOperation() string {
+	if m != nil {
+		return m.Operation
+	}
+	return ""
+}
+
+// 通用消息接口
+type Message interface {
+	proto.Message
+}
+
+// 通用响应消息
+type CommonResponse struct {
+	Code                 int32    `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Data                 []byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CommonResponse) Reset()         { *m = CommonResponse{} }
+func (m *CommonResponse) String() string { return proto.CompactTextString(m) }
+func (*CommonResponse) ProtoMessage()    {}
+
+func (m *CommonResponse) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+func (m *CommonResponse) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *CommonResponse) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
 // Protobuf marshaling functions
 func Marshal(m interface{}) ([]byte, error) {
 	return proto.Marshal(m.(proto.Message))

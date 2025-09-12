@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"lufy/internal/logger"
-	"lufy/internal/pool"
+	"github.com/phuhao00/lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/pool"
 )
 
 // Connection TCP连接
@@ -74,6 +74,14 @@ func (c *Connection) IsClosed() bool {
 	return atomic.LoadInt32(&c.closed) == 1
 }
 
+// Reset 重置连接状态
+func (c *Connection) Reset() {
+	c.UserID = 0
+	c.SessionID = ""
+	c.LastActivity = time.Time{}
+	atomic.StoreInt32(&c.closed, 0)
+}
+
 // MessageHandler 消息处理器接口
 type MessageHandler interface {
 	HandleMessage(conn *Connection, data []byte) error
@@ -110,7 +118,9 @@ func NewTCPServer(address string, port int, handler MessageHandler, maxConns int
 		writeTimeout: 30 * time.Second,
 		ctx:          ctx,
 		cancel:       cancel,
-		connPool:     pool.NewConnectionPool(maxConns),
+		connPool:     pool.NewConnectionPool(maxConns, func() interface{} {
+			return &Connection{}
+		}),
 	}
 }
 

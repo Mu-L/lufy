@@ -18,7 +18,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // SecurityManager 安全管理器

@@ -9,7 +9,7 @@ import (
 
 	"github.com/nsqio/go-nsq"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // NSQConfig NSQ配置
@@ -265,7 +265,7 @@ func (nm *NSQManager) Subscribe(topic, channel string, handler MessageHandler) e
 
 	config := nsq.NewConfig()
 	config.MaxInFlight = nm.config.MaxInFlight
-	config.MessageTimeout = nm.config.MessageTimeout
+	config.MsgTimeout = nm.config.MessageTimeout
 
 	consumer, err := nsq.NewConsumer(topic, channel, config)
 	if err != nil {

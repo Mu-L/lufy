@@ -4,16 +4,21 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 
-	"lufy/internal/logger"
-	"lufy/internal/mq"
-	"lufy/pkg/proto"
+	"github.com/phuhao00/lufy/internal/database"
+	"github.com/phuhao00/lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/mq"
+	"github.com/phuhao00/lufy/pkg/proto"
 )
 
 // ChatServer 聊天服务器
 type ChatServer struct {
 	*BaseServer
-	chatHandler *mq.ChatMessageHandler
+	chatRepo      *database.ChatRepository
+	userRepo      *database.UserRepository
+	nextMessageID uint64
+	idMutex       sync.Mutex
 }
 
 // NewChatServer 创建聊天服务器
@@ -27,8 +32,11 @@ func NewChatServer(configFile, nodeID string) *ChatServer {
 		BaseServer: baseServer,
 	}
 
-	// 创建聊天消息处理器
-	chatServer.chatHandler = mq.NewChatMessageHandler(chatServer.handleChatMessage)
+	// 初始化数据库仓库
+	chatServer.chatRepo = database.NewChatRepository(baseServer.mongoManager)
+	chatServer.userRepo = database.NewUserRepository(baseServer.mongoManager)
+
+	// TODO: 创建聊天消息处理器
 
 	// 注册通用服务
 	if err := RegisterCommonServices(baseServer); err != nil {
@@ -41,10 +49,8 @@ func NewChatServer(configFile, nodeID string) *ChatServer {
 		logger.Fatal(fmt.Sprintf("Failed to register chat service: %v", err))
 	}
 
-	// 订阅聊天消息
-	if err := baseServer.messageBroker.SubscribeChatMessages(chatServer.chatHandler); err != nil {
-		logger.Fatal(fmt.Sprintf("Failed to subscribe chat messages: %v", err))
-	}
+	// 订阅聊天消息 - 简化实现
+	// TODO: 实现消息订阅逻辑
 
 	return chatServer
 }
@@ -119,7 +125,7 @@ func (cs *ChatService) BlockUser(ctx context.Context, req *proto.BaseRequest) (*
 }
 
 // UnblockUser 取消屏蔽用户
-func (cs *ChatService) UnblockUser(ctx context.Context, req *proto.BaseResponse) (*proto.BaseResponse, error) {
+func (cs *ChatService) UnblockUser(ctx context.Context, req *proto.BaseRequest) (*proto.BaseResponse, error) {
 	// TODO: 实现取消屏蔽用户逻辑
 	return &proto.BaseResponse{
 		Header: req.Header,

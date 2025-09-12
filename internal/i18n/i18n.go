@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
-	"lufy/internal/logger"
+	"github.com/phuhao00/lufy/internal/logger"
 )
 
 // I18nManager 国际化管理器
@@ -70,7 +70,7 @@ func (im *I18nManager) LoadLanguage(langCode string) error {
 	defer im.mutex.Unlock()
 
 	// 解析语言标签
-	tag, err := language.Parse(langCode)
+	_, err := language.Parse(langCode)
 	if err != nil {
 		return fmt.Errorf("invalid language code: %s", langCode)
 	}

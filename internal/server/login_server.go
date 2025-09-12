@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"time"
 
-	"lufy/internal/actor"
-	"lufy/internal/database"
-	"lufy/internal/logger"
-	"lufy/pkg/proto"
+	"github.com/phuhao00/lufy/internal/actor"
+	"github.com/phuhao00/lufy/internal/database"
+	"github.com/phuhao00/lufy/internal/logger"
+	"github.com/phuhao00/lufy/pkg/proto"
 )
 
 // LoginServer 登录服务器

@@ -4,8 +4,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"lufy/internal/network"
 )
 
 // ObjectPool 通用对象池接口
@@ -158,23 +156,25 @@ func (p *MessagePool) PutMessage(msg *Message) {
 	p.Put(msg)
 }
 
+// Resettable 可重置接口
+type Resettable interface {
+	Reset()
+}
+
 // ConnectionPool 连接对象池
 type ConnectionPool struct {
 	*GenericPool
 }
 
 // NewConnectionPool 创建连接池
-func NewConnectionPool(maxSize int) *ConnectionPool {
+func NewConnectionPool(maxSize int, factory func() interface{}) *ConnectionPool {
 	return &ConnectionPool{
 		GenericPool: NewGenericPool(
 			maxSize,
-			func() interface{} {
-				return &network.Connection{}
-			},
+			factory,
 			func(obj interface{}) {
-				if conn, ok := obj.(*network.Connection); ok {
-					conn.UserID = 0
-					conn.SessionID = ""
+				if resettable, ok := obj.(Resettable); ok {
+					resettable.Reset()
 				}
 			},
 		),
@@ -182,12 +182,12 @@ func NewConnectionPool(maxSize int) *ConnectionPool {
 }
 
 // GetConnection 获取连接对象
-func (p *ConnectionPool) GetConnection() *network.Connection {
-	return p.Get().(*network.Connection)
+func (p *ConnectionPool) GetConnection() interface{} {
+	return p.Get()
 }
 
 // PutConnection 归还连接对象
-func (p *ConnectionPool) PutConnection(conn *network.Connection) {
+func (p *ConnectionPool) PutConnection(conn interface{}) {
 	p.Put(conn)
 }
 
@@ -330,7 +330,9 @@ func GetGlobalPools() *GlobalPools {
 	globalPoolsOnce.Do(func() {
 		globalPools = &GlobalPools{
 			MessagePool:    NewMessagePool(10000),
-			ConnectionPool: NewConnectionPool(1000),
+			ConnectionPool: NewConnectionPool(1000, func() interface{} {
+				return &struct{ ID uint64; UserID uint64; SessionID string }{}
+			}),
 			ByteBufferPool: NewByteBufferPool(),
 			ActorPool:      NewActorPool(5000),
 		}

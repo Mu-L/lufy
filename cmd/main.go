@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"lufy/internal/server"
+	"github.com/phuhao00/lufy/internal/server"
 )
 
 func main() {

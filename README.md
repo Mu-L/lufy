@@ -1,77 +1,52 @@
-# Lufy 分布式游戏服务器框架 🎮
+<div align="center">
 
-Lufy 是一个**企业级**的分布式游戏服务器框架，专为炉石传说、皇室战争、万智牌等卡牌和策略类游戏设计。框架基于 Actor 模型构建，具备生产级的高并发、安全性、监控能力和热更新机制。
+# Lufy 🎮
 
-[![Go Version](https://img.shields.io/badge/Go-1.21+-blue.svg)](https://golang.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
-[![Coverage](https://img.shields.io/badge/Coverage-85%25-yellow.svg)]()
+**企业级分布式游戏服务器框架**
 
-## 🚀 核心特性
+*专为卡牌和策略类游戏设计，基于 Actor 模型构建*
 
-### 🏗️ 基础架构
-- **Actor 模型**: 基于 Actor 模型的并发处理，支持消息驱动的异步编程
-- **分布式架构**: 支持多节点部署，可横向扩展至数千台服务器
-- **服务发现**: 基于 ETCD 的自动服务发现和注册，支持故障自愈
-- **高性能网络**: TCP 协议 + Protobuf 序列化，支持百万级并发连接
-- **RPC 通信**: 内置高性能 RPC 框架，支持连接池和负载均衡
-- **消息队列**: 集成 NSQ 消息队列，支持异步消息处理和事件驱动
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=for-the-badge&logo=go)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/phuhao00/lufy?style=for-the-badge&logo=github)](https://github.com/phuhao00/lufy/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/phuhao00/lufy?style=for-the-badge&logo=github)](https://github.com/phuhao00/lufy/network)
 
-### 💾 数据和存储
-- **数据存储**: Redis 集群（6节点）+ MongoDB 副本集（3节点）
-- **高可用部署**: 支持Redis哨兵、MongoDB副本集、分片集群
-- **对象池**: 智能对象池系统，显著降低 GC 压力
-- **数据一致性**: 分布式事务支持，保证数据一致性
-- **缓存策略**: 多级缓存机制，提升数据访问性能
-- **故障转移**: 自动主从切换，零停机时间
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=github-actions)](https://github.com/phuhao00/lufy)
+[![Coverage](https://img.shields.io/badge/Coverage-85%25-yellow?style=for-the-badge&logo=codecov)](https://github.com/phuhao00/lufy)
+[![Go Report Card](https://goreportcard.com/badge/github.com/phuhao00/lufy?style=for-the-badge)](https://goreportcard.com/report/github.com/phuhao00/lufy)
+[![Docker Pulls](https://img.shields.io/docker/pulls/phuhao00/lufy?style=for-the-badge&logo=docker)](https://hub.docker.com/r/phuhao00/lufy)
 
-### 🔥 热更新系统
-- **配置热更新**: 无需重启即可更新游戏配置
-- **逻辑热更新**: 支持游戏逻辑模块的动态加载
-- **插件系统**: 基于 Go Plugin 的热插拔模块架构
-- **版本控制**: 安全的热更新版本管理和回滚机制
+🚀 **高并发** • 🔒 **安全性** • 📊 **监控** • 🔥 **热更新** • 🌍 **国际化**
 
-### 📊 监控和分析
-- **Prometheus 集成**: 完整的指标收集和监控体系，支持集群监控
-- **Zap 高性能日志**: 结构化日志记录，支持高并发和采样
-- **pprof 性能分析**: 内置性能分析工具，支持 CPU/内存/Goroutine 分析
-- **实时告警**: 智能告警系统，支持多种通知渠道
-- **性能可视化**: Grafana 仪表板，实时可视化集群性能数据
-- **集群拓扑**: 自动发现和可视化集群拓扑结构
+</div>
 
-### 🔐 安全增强
-- **多层安全防护**: JWT 认证 + 会话管理 + IP 黑名单
-- **反作弊系统**: 智能作弊检测和行为分析
-- **数据加密**: AES-GCM 加密算法保护敏感数据
-- **限流保护**: 多维度限流机制，防止恶意攻击
+**Lufy** 基于 Actor 模型构建，提供高并发、安全性、监控和热更新能力，支持百万级并发连接。
 
-### 🌍 国际化支持
-- **多语言支持**: 内置中英日韩等语言包
-- **动态语言切换**: 客户端可动态切换显示语言
-- **本地化格式**: 数字、货币、时间的本地化显示
-- **翻译管理**: 便捷的翻译更新和版本管理
+## ✨ 核心特性
 
-### 🎪 玩法扩展
-- **游戏模块化**: 支持多种游戏玩法的模块化开发
-- **卡牌系统**: 内置完整的卡牌游戏框架
-- **房间管理**: 灵活的游戏房间创建和管理
-- **AI 系统**: 支持游戏 AI 的集成和扩展
+| 特性 | 描述 | 技术栈 |
+|------|------|--------|
+| 🏗️ **分布式架构** | Actor模型 + 微服务，支持横向扩展 | Go + ETCD + RPC |
+| 🚀 **高性能网络** | 百万级并发连接，TCP + Protobuf | TCP/Protobuf/连接池 |
+| 💾 **数据存储** | Redis集群 + MongoDB副本集 | Redis(6节点) + MongoDB(3节点) |
+| 🔥 **热更新** | 配置/逻辑/插件动态更新 | Go Plugin + 版本控制 |
+| 📊 **监控分析** | 实时指标 + 性能分析 | Prometheus + Grafana + pprof |
+| 🔐 **安全防护** | JWT认证 + 反作弊 + 限流 | JWT + AES-GCM + 行为分析 |
+| 🌍 **国际化** | 多语言 + 本地化格式 | i18n + 动态切换 |
+| 🎮 **游戏框架** | 卡牌系统 + 房间管理 + AI | 模块化设计 |
 
 ## 📋 系统要求
 
-### 必需组件
-- Go 1.21+
-- Redis 6.0+
-- MongoDB 4.4+
-- ETCD 3.5+
-- NSQ 1.2+
-
-### 可选组件
-- Docker & Docker Compose（用于快速部署）
+| 组件 | 版本 | 用途 | 必需 |
+|------|------|------|------|
+| Go | 1.21+ | 运行时环境 | ✅ |
+| Redis | 6.0+ | 缓存存储 | ✅ |
+| MongoDB | 4.4+ | 数据持久化 | ✅ |
+| ETCD | 3.5+ | 服务发现 | ✅ |
+| NSQ | 1.2+ | 消息队列 | ✅ |
+| Docker | Latest | 容器化部署 | 🔶 |
 
 ## 🏗️ 系统架构
-
-### 整体架构图
 
 ```mermaid
 graph TB
@@ -147,767 +122,130 @@ graph TB
     PPROF --> GAME1
 ```
 
-### 技术栈组件
-
-| 组件类型 | 技术选型 | 用途说明 |
-|----------|----------|----------|
-| **编程语言** | Go 1.21+ | 高性能、并发友好 |
-| **通信协议** | TCP + Protobuf | 高效二进制协议 |
-| **并发模型** | Actor Model | 消息驱动的异步处理 |
-| **服务发现** | ETCD | 分布式配置和服务注册 |
-| **缓存系统** | Redis | 高速数据缓存 |
-| **数据库** | MongoDB | 文档型数据库 |
-| **消息队列** | NSQ | 轻量级消息队列 |
-| **监控系统** | Prometheus + Grafana | 指标收集和可视化 |
-| **性能分析** | pprof | Go 原生性能分析 |
-| **容器化** | Docker + Docker Compose | 容器化部署 |
+**技术栈**: Go + Redis + MongoDB + ETCD + NSQ + Prometheus + Grafana + Docker
 
 ## 🎯 服务节点
 
-| 服务 | 说明 | TCP端口 | RPC端口 | 监控端口 | 核心职责 |
-|------|------|---------|---------|----------|----------|
-| **Gateway** | 网关服务 | 8001-8002 | 9001-9002 | 7001-7002 | 客户端接入、消息路由、负载均衡、安全验证 |
-| **Login** | 登录服务 | - | 9020 | 7020 | 用户认证、JWT令牌、会话管理、安全检查 |
-| **Lobby** | 大厅服务 | - | 9030 | 7030 | 房间管理、匹配系统、游戏模式选择 |
-| **Game** | 游戏服务 | - | 9100-9102 | 7100-7102 | 游戏逻辑、AI系统、热更新模块 |
-| **Enhanced Game** | 增强游戏服务 | - | 9103-9105 | 7103-7105 | 包含所有新特性的游戏服务节点 |
-| **Friend** | 好友服务 | - | 9040 | 7040 | 好友关系、社交功能、状态同步 |
-| **Chat** | 聊天服务 | - | 9050 | 7050 | 聊天系统、消息广播、内容过滤 |
-| **Mail** | 邮件服务 | - | 9060 | 7060 | 邮件系统、奖励发放、通知推送 |
-| **GM** | 管理服务 | - | 9200 | 7200 | GM工具、运营管理、热更新控制 |
-| **Center** | 中心服务 | - | 9010 | 7010 | 集群管理、监控统计、服务协调 |
-
-### 端口分配规则
-
-- **TCP端口 (8xxx)**: 客户端连接端口，主要用于Gateway服务
-- **RPC端口 (9xxx)**: 服务间RPC通信端口
-- **监控端口 (7xxx)**: HTTP监控接口，提供指标查询和健康检查
-- **pprof端口 (8xxx)**: 性能分析端口 = 监控端口 + 1000
+| 服务 | RPC端口 | 监控端口 | 核心功能 |
+|------|---------|----------|----------|
+| Gateway | 9001-9002 | 7001-7002 | 客户端接入、负载均衡 |
+| Login | 9020 | 7020 | 用户认证、会话管理 |
+| Lobby | 9030 | 7030 | 房间管理、匹配系统 |
+| Game | 9100-9102 | 7100-7102 | 游戏逻辑、AI系统 |
+| Friend | 9040 | 7040 | 好友系统、社交功能 |
+| Chat | 9050 | 7050 | 聊天系统、消息广播 |
+| Mail | 9060 | 7060 | 邮件系统、奖励发放 |
+| GM | 9200 | 7200 | 运营管理、热更新 |
+| Center | 9010 | 7010 | 集群管理、监控统计 |
 
 ## 🚀 快速开始
 
-### 1. 环境检查
-
-使用自动检查脚本验证环境依赖：
+### 1. 克隆项目
 
 ```bash
-git clone <repository-url> lufy
+git clone https://github.com/phuhao00/lufy.git
 cd lufy
-
-# 检查所有依赖
-chmod +x scripts/*.sh
-./scripts/check_deps.sh
 ```
 
-### 2. Docker 部署方式
+### 2. 部署方式
 
-#### 2.1 单机部署（开发/测试）
+| 方式 | 命令 | 适用场景 |
+|------|------|----------|
+| **Docker单机** | `docker-compose up -d` | 开发测试 |
+| **集群部署** | `./scripts/start_cluster.sh` | 生产环境 |
+| **本地开发** | `go mod tidy && make build && ./scripts/start.sh` | 本地调试 |
 
-```bash
-# 启动单机版本（包括所有依赖服务）
-docker-compose up -d
-
-# 查看服务状态
-docker-compose ps
-
-# 查看日志
-docker-compose logs -f lufy-center
-```
-
-#### 2.2 集群部署（生产推荐）
+### 3. 验证部署
 
 ```bash
-# 启动高可用集群（Redis集群 + MongoDB副本集 + ETCD集群）
-make cluster-up
-
-# 或手动启动
-chmod +x scripts/*.sh
-./scripts/start_cluster.sh full --with-monitoring
-
-# 快速启动（开发用）
-./scripts/start_cluster.sh quick
-
-# 查看集群状态
-./scripts/cluster_status.sh
-
-# 实时集群监控
-./scripts/cluster_status.sh watch
-```
-
-**集群架构包含：**
-- **Redis集群**: 6节点（3主3从）
-- **MongoDB副本集**: 3节点（1主2从）
-- **ETCD集群**: 3节点（高可用）
-- **NSQ集群**: 2个Lookup + 3个Daemon
-- **应用服务**: 多实例负载均衡
-- **负载均衡**: Nginx反向代理
-
-### 3. 本地开发启动
-
-#### 3.1 启动基础依赖
-
-```bash
-# 使用 Docker 启动基础设施（推荐）
-docker-compose up -d redis mongodb etcd nsqlookupd nsqd
-
-# 或手动启动各个组件
-redis-server &
-mongod &
-etcd &
-nsqlookupd &
-nsqd --lookupd-tcp-address=127.0.0.1:4160 &
-```
-
-#### 3.2 构建和启动游戏服务器
-
-```bash
-# 下载Go依赖
-go mod tidy
-
-# 构建项目
-make build
-
-# 启动基础版游戏服务器
-./scripts/start.sh
-
-# 或启动增强版游戏服务器（包含所有新特性）
-./scripts/start_enhanced.sh
-
-# 启动增强版 + 完整监控栈
-./scripts/start_enhanced.sh --with-monitoring
-```
-
-### 4. 验证部署
-
-#### 4.1 检查服务状态
-
-```bash
-# 查看所有服务状态
+# 检查服务状态
 ./scripts/status.sh
 
-# 实时监控模式
-./scripts/status.sh watch
-```
-
-#### 4.2 测试客户端连接
-
-```bash
-# 运行测试客户端
+# 测试客户端连接
 go run examples/client/main.go
-
-# 输出示例:
-# Connected to server: 127.0.0.1:8001
-# Login successful! UserID: 123456, Token: abcd1234...
-# Player Info - Nickname: testuser, Level: 1, Gold: 1000, Diamond: 100
 ```
 
-#### 4.3 访问监控面板
+### 4. 监控面板
 
-启动完成后，可以访问以下监控面板：
-
-| 服务 | 地址 | 说明 |
+| 服务 | 地址 | 用途 |
 |------|------|------|
-| **主监控面板** | http://localhost:7001 | 服务健康状况和指标 |
-| **pprof 性能分析** | http://localhost:8001/debug/pprof/ | Go 性能分析工具 |
-| **Prometheus** | http://localhost:9090 | 指标数据库和查询 |
-| **Grafana** | http://localhost:3000 | 可视化仪表板 (admin/admin) |
-| **NSQ 管理** | http://localhost:4171 | 消息队列管理 |
-| **Redis 管理** | http://localhost:8081 | Redis 数据管理 |
-| **MongoDB 管理** | http://localhost:8082 | MongoDB 数据管理 |
-
-### 5. 性能分析
-
-#### 5.1 使用内置分析工具
-
-```bash
-# 收集性能指标
-go run tools/performance_analyzer.go collect
-
-# 生成 pprof 分析命令
-go run tools/performance_analyzer.go pprof
-
-# 实时监控模式
-go run tools/performance_analyzer.go watch
-```
-
-#### 5.2 pprof 性能分析
-
-```bash
-# CPU 性能分析（采集30秒）
-go tool pprof http://localhost:8001/debug/pprof/profile?seconds=30
-
-# 内存堆分析
-go tool pprof http://localhost:8001/debug/pprof/heap
-
-# Goroutine 分析
-go tool pprof http://localhost:8001/debug/pprof/goroutine
-
-# 在 pprof 交互模式中：
-(pprof) top          # 查看热点函数
-(pprof) web          # 生成调用图
-(pprof) list main    # 查看函数代码
-```
+| 主监控 | http://localhost:7001 | 服务状态 |
+| Grafana | http://localhost:3000 | 可视化监控 |
+| Prometheus | http://localhost:9090 | 指标查询 |
 
 ## ⚙️ 配置说明
 
-主配置文件位于 `config/config.yaml`，包含以下配置项：
+主配置文件：`config/config.yaml`
 
-### 服务器配置
 ```yaml
 server:
   name: "lufy-game-server"
-  version: "1.0.0"
   debug: true
-```
 
-### 网络配置
-```yaml
 network:
-  tcp_port: 8001      # TCP服务端口
-  rpc_port: 9001      # RPC服务端口
-  http_port: 7001     # HTTP管理端口
-  max_connections: 10000
-  read_timeout: 30
-  write_timeout: 30
-```
+  tcp_port: 8001
+  rpc_port: 9001
+  http_port: 7001
 
-### 数据库配置
-```yaml
 database:
   redis:
     addr: "127.0.0.1:6379"
-    password: ""
-    db: 0
-    pool_size: 100
   mongodb:
     uri: "mongodb://127.0.0.1:27017"
     database: "lufy_game"
-    pool_size: 100
 ```
 
-## 🔥 热更新系统
+## 🔥 热更新
 
-Lufy 支持生产级的热更新机制，可在不停服的情况下更新游戏逻辑、配置和数据。
-
-### 热更新类型
-
-| 类型 | 说明 | 影响范围 | 安全级别 |
-|------|------|----------|----------|
-| **配置更新** | 游戏参数、平衡性调整 | 所有服务 | 🟢 安全 |
-| **逻辑更新** | 游戏规则、AI算法 | 游戏服务 | 🟡 谨慎 |
-| **数据更新** | 卡牌数据、奖励配置 | 相关服务 | 🟢 安全 |
-| **模块更新** | 新功能模块 | 指定服务 | 🔴 高风险 |
-
-### 热更新操作
+支持配置、逻辑、数据的动态更新，无需重启服务。
 
 ```bash
-# 重载所有节点的配置文件
+# 重载配置
 ./scripts/hot_reload.sh config
 
-# 重载游戏节点的逻辑模块
+# 重载游戏逻辑
 ./scripts/hot_reload.sh logic game
 
-# 重载指定节点的特定模块
-./scripts/hot_reload.sh module gateway1 auth_module
-
-# 查看热更新状态
+# 查看状态
 ./scripts/hot_reload.sh status
-
-# 回滚最近的更新
-./scripts/hot_reload.sh rollback game1
 ```
 
-### 热更新最佳实践
+## 📊 监控与分析
 
+**监控指标**: 在线用户数、QPS、响应时间、错误率、内存使用、Goroutine数量
+
+**性能分析**:
 ```bash
-# 1. 更新前备份配置
-cp config/config.yaml config/config.yaml.backup
-
-# 2. 验证配置文件语法
-make validate-config
-
-# 3. 在单个节点测试
-./scripts/hot_reload.sh config game1
-
-# 4. 确认无误后全量更新
-./scripts/hot_reload.sh config all
-
-# 5. 监控系统指标
-go run tools/performance_analyzer.go watch
+# CPU/内存/协程分析
+go tool pprof http://localhost:8080/debug/pprof/profile
+go tool pprof http://localhost:8080/debug/pprof/heap
 ```
 
-## 📊 性能监控与分析
+## 🔒 安全特性
 
-### Prometheus 指标
+| 安全功能 | 实现方式 |
+|----------|----------|
+| JWT认证 | Token验证机制 |
+| 反作弊 | 操作频率限制、数据异常检测 |
+| 加密传输 | AES-256-GCM算法 |
+| 防重放 | 时间戳+随机数验证 |
 
-Lufy 内置了完整的 Prometheus 指标体系：
+## 🌍 国际化
 
-```bash
-# 查看所有指标
-curl http://localhost:7001/metrics
+**支持语言**: 🇨🇳中文、🇺🇸English、🇯🇵日本語、🇰🇷한국어
 
-# 关键业务指标
-curl http://localhost:7001/api/metrics | jq .
-```
+## 📱 客户端接入
 
-#### 核心指标说明
-
-```yaml
-# 系统指标
-lufy_cpu_usage_percent{node_id="game1",node_type="game"}      # CPU使用率
-lufy_memory_usage_bytes{node_id="game1",node_type="game"}     # 内存使用量
-lufy_goroutines_total{node_id="game1",node_type="game"}       # Goroutine数量
-
-# 网络指标
-lufy_connections_total{node_id="gateway1",node_type="gateway"} # 连接数
-lufy_request_duration_seconds                                  # 请求延迟
-
-# 业务指标
-lufy_messages_total{message_type="user_login"}                # 消息处理量
-lufy_errors_total{error_type="login_failed"}                  # 错误统计
-lufy_actors_total{node_id="game1",node_type="game"}          # Actor数量
-```
-
-### 性能分析工具
-
-#### 自动化分析
-
-```bash
-# 收集当前性能快照
-go run tools/performance_analyzer.go collect
-
-# 输出示例：
-# 📈 集群概览:
-#   服务总数: 12
-#   平均CPU使用率: 15.2%
-#   平均内存使用率: 45.8%
-#   总Goroutines: 2847
-#   告警总数: 0
-#   优化建议: 2条
-
-# 与历史数据对比
-go run tools/performance_analyzer.go save baseline.json
-# ... 运行一段时间后 ...
-go run tools/performance_analyzer.go compare baseline.json
-```
-
-#### 手动 pprof 分析
-
-```bash
-# 各服务的性能分析端点
-go tool pprof http://localhost:8001/debug/pprof/profile   # Gateway
-go tool pprof http://localhost:8100/debug/pprof/heap     # Game Server  
-go tool pprof http://localhost:8020/debug/pprof/goroutine # Login
-
-# 生成性能报告
-go tool pprof -http=:8080 profile.pb.gz  # Web界面查看
-go tool pprof -png profile.pb.gz > profile.png  # 生成PNG图片
-```
-
-### Grafana 仪表板
-
-访问 http://localhost:3000，使用 admin/admin 登录，预配置的仪表板包括：
-
-1. **集群概览**: 整体健康状况和关键指标
-2. **服务详情**: 单个服务的详细监控
-3. **业务监控**: 用户登录、游戏活跃度等
-4. **告警中心**: 实时告警和历史记录
-
-## 🔐 安全特性
-
-### 认证和授权
-
-```go
-// JWT 令牌认证
-claims := &TokenClaims{
-    UserID:      userID,
-    Username:    username,
-    Permissions: []string{"player", "premium"},
-    StandardClaims: jwt.StandardClaims{
-        ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-    },
-}
-
-token, err := security.GenerateToken(claims)
-```
-
-### 反作弊系统
-
-```bash
-# 查看作弊检测报告
-curl http://localhost:7001/api/security
-
-# 手动标记可疑用户
-curl -X POST http://localhost:7200/gm/flag_user \
-  -d '{"user_id": 123456, "reason": "suspicious_pattern"}'
-```
-
-### 安全配置
-
-```yaml
-# config/security.yaml
-security:
-  jwt:
-    secret: "your-jwt-secret"
-    expires_hours: 24
-  
-  rate_limit:
-    requests_per_minute: 100
-    burst_size: 10
-  
-  blacklist:
-    auto_ban_threshold: 10
-    ban_duration_hours: 24
-  
-  encryption:
-    algorithm: "aes-gcm"
-    key_size: 256
-```
-
-## 🌍 国际化配置
-
-### 支持的语言
-
-- 🇺🇸 **English (en)** - 默认语言
-- 🇨🇳 **简体中文 (zh-CN)** - 完整支持
-- 🇯🇵 **日本語 (ja)** - 基础支持
-- 🇰🇷 **한국어 (ko)** - 基础支持
-
-### 语言配置
-
-```bash
-# 添加新语言包
-mkdir -p locales
-echo '[{"id": "welcome", "one": "Welcome to the game!"}]' > locales/en.json
-
-# 更新翻译
-curl -X POST http://localhost:7001/api/i18n/update \
-  -d '{"lang": "zh-CN", "key": "welcome", "value": "欢迎来到游戏！"}'
-
-# 验证翻译完整性
-curl http://localhost:7001/api/i18n/validate
-```
-
-### 客户端语言检测
-
-```go
-// 自动检测客户端语言偏好
-acceptLanguage := "zh-CN,zh;q=0.9,en;q=0.8"
-detectedLang := i18nManager.DetectLanguage(acceptLanguage)
-// 返回: "zh-CN"
-
-// 格式化本地化消息
-message := i18nManager.Translate("zh-CN", "game.your_turn", nil)
-// 返回: "轮到你了"
-```
-
-## 🎮 客户端接入
-
-### 协议格式
-
-客户端与服务器通信使用 Protobuf 协议，消息格式：
-
-```
-[4字节长度][4字节消息ID][Protobuf消息内容]
-```
-
-### 消息结构
-
-```protobuf
-message BaseRequest {
-    MessageHeader header = 1;  // 消息头
-    bytes data = 2;           // 消息体
-}
-
-message BaseResponse {
-    MessageHeader header = 1;  // 消息头
-    int32 code = 2;           // 错误码
-    string msg = 3;           // 消息内容（已本地化）
-    bytes data = 4;           // 响应数据
-}
-
-message MessageHeader {
-    uint32 msg_id = 1;        // 消息ID
-    uint32 seq = 2;           // 序列号
-    uint64 user_id = 3;       // 用户ID
-    uint32 timestamp = 4;     // 时间戳
-    string session_id = 5;    // 会话ID
-}
-```
-
-### 消息ID规划
-
-| 消息ID范围 | 服务类型 | 说明 |
-|-----------|----------|------|
-| 1001-1999 | Gateway | 登录、心跳、基础功能 |
-| 2001-2999 | Lobby | 大厅、房间管理 |
-| 3001-3999 | Game | 游戏逻辑、操作 |
-| 4001-4999 | Friend | 好友系统 |
-| 5001-5999 | Chat | 聊天功能 |
-| 6001-6999 | Mail | 邮件系统 |
-| 7001-7999 | GM | 管理功能 |
-
-### 完整登录流程
-
-```go
-// 1. 建立TCP连接到网关
-conn, err := net.Dial("tcp", "127.0.0.1:8001")
-
-// 2. 构造登录请求
-loginReq := &proto.LoginRequest{
-    Username: "player1",
-    Password: "123456",
-    DeviceId: "device_123",
-    Platform: "android",
-    Version:  "1.0.0",
-}
-
-// 3. 封装成基础请求
-baseReq := &proto.BaseRequest{
-    Header: &proto.MessageHeader{
-        MsgId:     1001, // 登录消息ID
-        Seq:       1,
-        Timestamp: uint32(time.Now().Unix()),
-    },
-    Data: proto.Marshal(loginReq),
-}
-
-// 4. 发送请求并处理响应
-response, err := sendRequest(conn, 1001, baseReq)
-if err != nil {
-    log.Fatal(err)
-}
-
-// 5. 解析登录响应
-var loginResp proto.LoginResponse
-proto.Unmarshal(response.Data, &loginResp)
-
-fmt.Printf("登录成功! 用户ID: %d, 令牌: %s\n", 
-    loginResp.UserId, loginResp.Token[:10]+"...")
-```
+**协议格式**: JSON格式，包含type、id、service、method、data、timestamp字段
 
 ## 🔧 开发指南
 
-### 添加新服务节点
+**项目结构**: cmd/服务入口、internal/内部包、api/接口定义、configs/配置文件
 
-1. **创建服务文件**：`internal/server/your_server.go`
-2. **实现Server接口**：包括Start()、Stop()等方法
-3. **注册服务类型**：在`NewServer`函数中添加服务类型
-4. **更新配置**：添加端口配置和服务参数
-5. **更新启动脚本**：添加到启动序列
-
-```go
-// internal/server/your_server.go
-type YourServer struct {
-    *BaseServer
-    yourComponent *YourComponent
-}
-
-func NewYourServer(configFile, nodeID string) *YourServer {
-    baseServer, err := NewBaseServer(configFile, "your_service", nodeID)
-    if err != nil {
-        logger.Fatal(fmt.Sprintf("Failed to create base server: %v", err))
-    }
-
-    yourServer := &YourServer{
-        BaseServer: baseServer,
-        yourComponent: NewYourComponent(),
-    }
-
-    // 注册通用服务
-    if err := RegisterCommonServices(baseServer); err != nil {
-        logger.Fatal(fmt.Sprintf("Failed to register common services: %v", err))
-    }
-
-    return yourServer
-}
-```
-
-### 添加新的Actor
-
-```go
-type YourActor struct {
-    *actor.BaseActor
-    server     *YourServer
-    customData map[string]interface{}
-}
-
-func NewYourActor(server *YourServer) *YourActor {
-    baseActor := actor.NewBaseActor("your_actor", "your_type", 1000)
-    return &YourActor{
-        BaseActor:  baseActor,
-        server:     server,
-        customData: make(map[string]interface{}),
-    }
-}
-
-func (ya *YourActor) OnReceive(ctx context.Context, msg actor.Message) error {
-    // 记录性能指标
-    start := time.Now()
-    defer func() {
-        duration := time.Since(start)
-        ya.server.monitoring.RecordRequestDuration("actor", msg.GetType(), duration)
-    }()
-
-    switch msg.GetType() {
-    case "your_message_type":
-        return ya.handleYourMessage(msg)
-    case actor.MSG_TYPE_SYSTEM_CMD:
-        return ya.handleSystemCommand(msg)
-    default:
-        logger.Debug(fmt.Sprintf("Unknown message type: %s", msg.GetType()))
-    }
-    return nil
-}
-
-func (ya *YourActor) handleYourMessage(msg actor.Message) error {
-    // 实现自定义消息处理逻辑
-    ya.server.monitoring.RecordMessage("your_message")
-    return nil
-}
-```
-
-### 添加新的RPC服务
-
-```go
-type YourService struct {
-    server   *YourServer
-    security *security.SecurityManager
-    i18n     *i18n.I18nManager
-}
-
-func NewYourService(server *YourServer) *YourService {
-    return &YourService{
-        server:   server,
-        security: server.security,
-        i18n:     server.i18n,
-    }
-}
-
-func (ys *YourService) RegisterMethods() map[string]reflect.Value {
-    methods := make(map[string]reflect.Value)
-    methods["YourMethod"] = reflect.ValueOf(ys.YourMethod)
-    methods["SecureMethod"] = reflect.ValueOf(ys.SecureMethod)
-    return methods
-}
-
-func (ys *YourService) YourMethod(ctx context.Context, req *proto.BaseRequest) (*proto.BaseResponse, error) {
-    // 性能监控
-    start := time.Now()
-    defer func() {
-        duration := time.Since(start)
-        ys.server.monitoring.RecordRequestDuration("rpc", "YourMethod", duration)
-    }()
-
-    // 安全验证
-    session, err := ys.validateRequest(req)
-    if err != nil {
-        return ys.createErrorResponse(req, -1, "error.permission_denied", nil)
-    }
-
-    // 业务逻辑处理
-    // ...
-
-    // 返回本地化响应
-    langCode := ys.detectLanguage(req)
-    message := ys.i18n.Translate(langCode, "success.operation_completed", nil)
-
-    return &proto.BaseResponse{
-        Header: req.Header,
-        Code:   0,
-        Msg:    message,
-    }, nil
-}
-```
-
-### 添加新的游戏模块
-
-```go
-// plugins/your_game.go
-type YourGameModule struct {
-    name    string
-    version string
-    config  map[string]interface{}
-}
-
-func NewYourGameModule() *YourGameModule {
-    return &YourGameModule{
-        name:    "your_game",
-        version: "1.0.0",
-        config:  make(map[string]interface{}),
-    }
-}
-
-func (ygm *YourGameModule) Initialize() error {
-    // 加载游戏配置
-    ygm.config["max_players"] = 4
-    ygm.config["turn_time"] = 60
-    logger.Info("Your game module initialized")
-    return nil
-}
-
-func (ygm *YourGameModule) CreateRoom(config *gameplay.RoomConfig) (*gameplay.GameRoom, error) {
-    // 创建游戏房间逻辑
-    room := &gameplay.GameRoom{
-        ID:       generateRoomID(),
-        GameType: ygm.name,
-        Players:  make(map[uint64]*gameplay.Player),
-        State:    gameplay.GameStateWaiting,
-        Config:   config,
-    }
-    return room, nil
-}
-
-func (ygm *YourGameModule) ProcessAction(room *gameplay.GameRoom, player *gameplay.Player, action *gameplay.GameAction) (*gameplay.GameResult, error) {
-    // 实现游戏逻辑
-    switch action.Type {
-    case "your_action_type":
-        return ygm.processYourAction(room, player, action)
-    default:
-        return nil, fmt.Errorf("unknown action type: %s", action.Type)
-    }
-}
-```
-
-### 添加自定义监控指标
-
-```go
-// 在你的服务中添加自定义指标
-func (ys *YourService) initCustomMetrics() {
-    // 自定义计数器
-    ys.customCounter = prometheus.NewCounterVec(
-        prometheus.CounterOpts{
-            Name: "lufy_your_service_operations_total",
-            Help: "Total number of your service operations",
-        },
-        []string{"operation_type", "result"},
-    )
-
-    // 自定义直方图
-    ys.customHistogram = prometheus.NewHistogramVec(
-        prometheus.HistogramOpts{
-            Name:    "lufy_your_service_duration_seconds",
-            Help:    "Duration of your service operations",
-            Buckets: prometheus.DefBuckets,
-        },
-        []string{"operation_type"},
-    )
-
-    // 注册指标
-    prometheus.MustRegister(ys.customCounter, ys.customHistogram)
-}
-
-func (ys *YourService) recordOperation(opType string, success bool) {
-    result := "success"
-    if !success {
-        result = "failure"
-    }
-    ys.customCounter.With(prometheus.Labels{
-        "operation_type": opType,
-        "result":        result,
-    }).Inc()
-}
-```
+**添加新服务**:
+1. 创建服务目录和接口实现
+2. 注册到集群管理器
+3. 配置路由和消息处理
 
 ## 🛠️ 运维工具
 
@@ -1965,136 +1303,21 @@ security:
 
 ## 🤝 贡献指南
 
-我们欢迎所有形式的贡献！无论是代码、文档、测试还是建议，都能让Lufy变得更好。
+1. Fork 项目并创建功能分支
+2. 遵循 Go 代码规范，添加测试
+3. 提交 Pull Request
 
-### 参与方式
-
-1. **代码贡献** - 提交新功能或Bug修复
-2. **文档改进** - 完善文档，添加示例
-3. **测试用例** - 编写单元测试和集成测试
-4. **问题反馈** - 报告Bug或提出改进建议
-5. **社区建设** - 帮助其他开发者，分享使用经验
-
-### 开发流程
-
-1. **Fork 项目** 到你的GitHub账户
-2. **创建特性分支** (`git checkout -b feature/your-feature`)
-3. **开发功能** 并确保代码质量
-   ```bash
-   make lint      # 代码检查
-   make test      # 运行测试
-   make benchmark # 性能测试
-   ```
-4. **更新文档** 说明功能使用方法
-5. **提交代码** (`git commit -m 'feat: add your feature'`)
-6. **推送分支** (`git push origin feature/your-feature`)
-7. **提交PR** 并详细描述变更
-
-### 代码规范
-
-遵循以下编码标准：
-
-- **Go代码规范**: 使用 `gofmt` 和 `golangci-lint`
-- **命名规范**: 使用有意义的变量和函数名
-- **注释规范**: 公共API必须有注释
-- **测试覆盖**: 新功能必须包含测试用例
-- **性能考量**: 注意内存分配和并发安全
-
-### 提交消息规范
-
-使用约定式提交格式：
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-示例：
-```
-feat(actor): add message priority queue
-fix(network): resolve connection leak issue
-docs(readme): update installation guide
-perf(pool): optimize object pool allocation
-```
+**代码规范**: 使用 gofmt 格式化、添加注释、测试覆盖率 > 80%
 
 ## 📄 许可证
 
-本项目采用 **MIT 许可证** - 详见 [LICENSE](LICENSE) 文件
+MIT License - 详见 [LICENSE](LICENSE) 文件
 
-你可以自由地：
-- ✅ 商业使用
-- ✅ 修改代码
-- ✅ 分发代码
-- ✅ 私人使用
+## 📞 联系方式
 
-但需要：
-- ⚠️ 包含许可证声明
-- ⚠️ 包含版权声明
-
-## 🌟 社区
-
-### 加入社区
-
-- **GitHub讨论**: [Discussions](https://github.com/your-repo/discussions)
-- **技术交流群**: QQ群 123456789
-- **Discord服务器**: [discord.gg/lufy](https://discord.gg/lufy)
-- **知乎专栏**: [Lufy游戏服务器开发](https://zhuanlan.zhihu.com/lufy)
-
-### 贡献者
-
-感谢所有为Lufy做出贡献的开发者！
-
-<img src="https://contrib.rocks/image?repo=your-repo/lufy" />
-
-## 🙏 致谢
-
-Lufy 的诞生离不开以下优秀的开源项目：
-
-### 核心依赖
-
-- **[Go](https://golang.org/)** - 高性能编程语言
-- **[ETCD](https://etcd.io/)** - 分布式键值存储
-- **[Redis](https://redis.io/)** - 内存数据结构存储
-- **[MongoDB](https://www.mongodb.com/)** - 文档型数据库
-- **[NSQ](https://nsq.io/)** - 实时分布式消息平台
-- **[Protocol Buffers](https://developers.google.com/protocol-buffers)** - 序列化框架
-
-### 监控和工具
-
-- **[Prometheus](https://prometheus.io/)** - 监控和告警系统
-- **[Grafana](https://grafana.com/)** - 可视化平台
-- **[gin-gonic/gin](https://github.com/gin-gonic/gin)** - HTTP Web框架
-- **[sirupsen/logrus](https://github.com/sirupsen/logrus)** - 结构化日志
-- **[spf13/viper](https://github.com/spf13/viper)** - 配置管理
-
-### 特别感谢
-
-- **云厂商支持**: 阿里云、腾讯云提供的技术支持
-- **社区贡献**: 所有提交代码和反馈的开发者
-- **测试用户**: 参与内测的游戏开发者和玩家
-
-## 📞 联系我们
-
-### 技术支持
-
-- **邮箱**: tech-support@lufy-game.com
-- **GitHub Issues**: [提交问题](https://github.com/your-repo/lufy/issues)
-- **技术文档**: [docs.lufy-game.com](https://docs.lufy-game.com)
-
-### 商务合作
-
-- **邮箱**: business@lufy-game.com
-- **微信**: LufyGameServer
-- **电话**: +86-xxx-xxxx-xxxx
-
-### 社交媒体
-
-- **微博**: [@Lufy游戏服务器](https://weibo.com/lufy-game)
-- **知乎**: [Lufy团队](https://zhihu.com/people/lufy-team)
-- **B站**: [Lufy技术分享](https://space.bilibili.com/lufy)
+- **GitHub**: https://github.com/phuhao00/lufy
+- **Issues**: https://github.com/phuhao00/lufy/issues
+- **Email**: phuhao00@gmail.com
 
 ---
 
@@ -2122,7 +1345,7 @@ cd lufy
 
 **⭐ 如果你觉得 Lufy 对你有帮助，请给我们一个 Star！ ⭐**
 
-[![Star History Chart](https://api.star-history.com/svg?repos=your-repo/lufy&type=Date)](https://star-history.com/#your-repo/lufy&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=phuhao00/lufy&type=Date)](https://star-history.com/#phuhao00/lufy&Date)
 
 **Made with ❤️ by the Lufy Team**
 
